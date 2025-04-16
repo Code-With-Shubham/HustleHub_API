@@ -1,19 +1,26 @@
-﻿# Use the official .NET 8 SDK image for building
+﻿# Use the official .NET SDK image to build the app
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Copy csproj and restore as distinct layers
-COPY *.sln ./
-COPY HustleHub_API/*.csproj ./HustleHub_API/
-RUN dotnet restore
-
-# Copy everything else and build
+# Copy everything to the container
 COPY . ./
-WORKDIR /app/HustleHub_API
-RUN dotnet publish -c Release -o /app/publish
 
-# Use runtime image for the final build
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+# Restore dependencies
+RUN dotnet restore HustleHub_API.sln
+
+# Build the app in Release mode
+RUN dotnet publish HustleHub_API/HustleHub_API.csproj -c Release -o out
+
+# Use the ASP.NET runtime image for the final image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
-COPY --from=build /app/publish .
+
+# Copy the published output from the build step
+COPY --from=build /app/out ./
+
+# Expose the port the app will run on
+EXPOSE 80
+
+# Set the entry point for the container
 ENTRYPOINT ["dotnet", "HustleHub_API.dll"]
+
