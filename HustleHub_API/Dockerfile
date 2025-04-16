@@ -1,32 +1,29 @@
-﻿# Use the official .NET SDK image to build the app
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-# Set the working directory in the container
+#Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
+#For more information, please see https://aka.ms/containercompat
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-nanoserver-1809 AS base
 WORKDIR /app
+EXPOSE 8080
+EXPOSE 8081
 
-# Copy the entire solution and all project files into the container
+FROM mcr.microsoft.com/dotnet/sdk:8.0-nanoserver-1809 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+COPY ["HustleHub_API/HustleHub_API.csproj", "HustleHub_API/"]
+COPY ["BusinessLogic/HustleHub.BusinessArea/HustleHub.BusinessArea.csproj", "BusinessLogic/HustleHub.BusinessArea/"]
+COPY ["DataContext/HustleHub.DataContext/HustleHub.DataContext.csproj", "DataContext/HustleHub.DataContext/"]
+RUN dotnet restore "./HustleHub_API/HustleHub_API.csproj"
 COPY . .
+WORKDIR "/src/HustleHub_API"
+RUN dotnet build "./HustleHub_API.csproj" -c %BUILD_CONFIGURATION% -o /app/build
 
-# Restore the dependencies (this will restore all projects within the solution)
-RUN dotnet restore HustleHub_API.sln
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./HustleHub_API.csproj" -c %BUILD_CONFIGURATION% -o /app/publish /p:UseAppHost=false
 
-# Build the application
-RUN dotnet build HustleHub_API.sln -c Release -o /app/build
-
-# Publish the app to the /app/publish folder
-RUN dotnet publish HustleHub_API.sln -c Release -o /app/publish
-
-# Use the official .NET runtime image to run the app
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-
-# Set the working directory in the container
+FROM base AS final
 WORKDIR /app
-
-# Copy the published app from the build stage
-COPY --from=build /app/publish .
-
-# Expose the port the app will run on
-EXPOSE 80
-
-# Start the app
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "HustleHub_API.dll"]
