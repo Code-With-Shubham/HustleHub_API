@@ -4,10 +4,10 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the entire solution into the container
+# Copy the entire solution and all project files into the container
 COPY . .
 
-# Restore the dependencies (you could also specify the individual csproj files here)
+# Restore the dependencies (this will restore all projects within the solution)
 RUN dotnet restore HustleHub_API.sln
 
 # Build the application
