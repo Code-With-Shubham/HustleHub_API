@@ -7,13 +7,8 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "HustleHub Swagger", Version = "v1" });
@@ -35,25 +30,24 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header
     };
     var requirement = new OpenApiSecurityRequirement
-                    {
-                             { key, new List<string>() }
-                    };
+    {
+        { key, new List<string>() }
+    };
     c.AddSecurityRequirement(requirement);
 });
 
-
 builder.Services.AddTransient<IRepository, Repository>();
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultDBConn"),
         sqlServerOptionsAction: sqlOptions =>
         {
-            // Enable transient error resiliency with retry options
             sqlOptions.EnableRetryOnFailure(
-                maxRetryCount: 5,           // Maximum number of retries
-                maxRetryDelay: TimeSpan.FromSeconds(30), // Maximum delay between retries
-                errorNumbersToAdd: null      // List of specific error numbers to trigger retries
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorNumbersToAdd: null
             );
         });
 });
@@ -73,4 +67,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// No second builder! Only this:
 app.Run();
