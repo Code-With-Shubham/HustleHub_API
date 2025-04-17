@@ -1,25 +1,22 @@
-# Build stage
+# Use official .NET SDK as build environment
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Copy solution and project files
-COPY HustleHub_API.sln ./
-COPY HustleHub_API/ HustleHub_API/
+# Copy csproj and restore
+COPY *.csproj ./
+RUN dotnet restore
 
-# Restore dependencies
-RUN dotnet restore "HustleHub_API.sln"
+# Copy rest of files and build
+COPY . ./
+RUN dotnet publish -c Release -o out
 
-# Build the project
-RUN dotnet build "HustleHub_API/HustleHub_API.csproj" -c Release -o /app/build
-
-# Publish stage
-FROM build AS publish
-RUN dotnet publish "HustleHub_API/HustleHub_API.csproj" -c Release -o /app/publish /p:UseAppHost=false
-
-# Final runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+# Build runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-EXPOSE 8080
-COPY --from=publish /app/publish .
+COPY --from=build /app/out .
 
+# Expose port
+EXPOSE 8080
+
+# Run app
 ENTRYPOINT ["dotnet", "HustleHub_API.dll"]

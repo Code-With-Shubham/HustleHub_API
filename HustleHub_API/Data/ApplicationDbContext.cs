@@ -2,56 +2,62 @@
 using System.Collections.Generic;
 using HustleHub_API.DBContext.Entities.TableEntities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
-namespace HustleHub_API.Data;
-
-public partial class ApplicationDbContext : DbContext
+namespace HustleHub_API.Data
 {
-    public ApplicationDbContext()
+    public partial class ApplicationDbContext : DbContext
     {
-    }
-
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options)
-    {
-    }
-
-    public virtual DbSet<ProjectRequest> ProjectRequests { get; set; }
-
-    public virtual DbSet<User> Users { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
+        public ApplicationDbContext()
         {
-            // Configuration will come from Program.cs via Dependency Injection.
         }
-    }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<ProjectRequest>(entity =>
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
         {
-            entity.HasKey(e => e.Id).HasName("PK__ProjectR__3214EC0737F10813");
+        }
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+        public virtual DbSet<ProjectRequest> ProjectRequests { get; set; }
+        public virtual DbSet<User> Users { get; set; }
 
-            entity.HasOne(d => d.MobileNavigation).WithMany(p => p.ProjectRequests)
-                .HasPrincipalKey(p => p.Mobile)
-                .HasForeignKey(d => d.Mobile)
-                .HasConstraintName("FK_ProjectRequest_Users");
-        });
-
-        modelBuilder.Entity<User>(entity =>
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC0741D229CA");
+            if (!optionsBuilder.IsConfigured)
+            {
+                var configuration = new ConfigurationBuilder()
+                    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                    .AddJsonFile("appsettings.json")
+                    .Build();
 
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-        });
+                var connectionString = configuration.GetConnectionString("DefaultDBConn");
 
-        OnModelCreatingPartial(modelBuilder);
+                optionsBuilder.UseSqlServer(connectionString);
+            }
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ProjectRequest>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("PK__ProjectR__3214EC0737F10813");
+                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+
+                entity.HasOne(d => d.MobileNavigation).WithMany(p => p.ProjectRequests)
+                    .HasPrincipalKey(p => p.Mobile)
+                    .HasForeignKey(d => d.Mobile)
+                    .HasConstraintName("FK_ProjectRequest_Users");
+            });
+
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("PK__Users__3214EC0741D229CA");
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            });
+
+            OnModelCreatingPartial(modelBuilder);
+        }
+
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
-
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }
