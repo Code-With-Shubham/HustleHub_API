@@ -6,8 +6,10 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services
+// Add services to the container.
+
 builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -20,7 +22,7 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Scheme = "ApiKeyScheme"
     });
-    var key = new OpenApiSecurityScheme
+    var key = new OpenApiSecurityScheme()
     {
         Reference = new OpenApiReference
         {
@@ -37,37 +39,34 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddTransient<IRepository, Repository>();
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultDBConn"),
         sqlServerOptionsAction: sqlOptions =>
         {
-            sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(30), null);
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorNumbersToAdd: null
+            );
         });
 });
 
 var app = builder.Build();
 
-// Configure middlewares
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseHttpsRedirection();
 }
-else
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    // Do not use HTTPS redirection in production docker
-}
+
+app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
-
-// ?? Health check endpoint
-app.MapGet("/health", () => "Healthy ?");
 
 app.Run();
