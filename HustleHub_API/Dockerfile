@@ -1,11 +1,9 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Copy solution and full project directories
+# Copy solution and project directories
 COPY HustleHub_API.sln ./
 COPY HustleHub_API/ HustleHub_API/
-COPY BusinessLogic/ BusinessLogic/
-COPY DataContext/ DataContext/
 
 # Restore the dependencies for the solution
 RUN dotnet restore "HustleHub_API.sln"

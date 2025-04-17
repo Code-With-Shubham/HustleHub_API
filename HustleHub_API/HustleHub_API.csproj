@@ -23,8 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BusinessLogic\HustleHub.BusinessArea\HustleHub.BusinessArea.csproj" />
-    <ProjectReference Include="..\DataContext\HustleHub.DataContext\HustleHub.DataContext.csproj" />
+    <Folder Include="BusinessLogic\Models\APIRequests\" />
   </ItemGroup>
 
 </Project>

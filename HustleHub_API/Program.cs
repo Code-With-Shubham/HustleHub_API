@@ -1,6 +1,6 @@
 using HustleHub.BusinessArea.Interface;
 using HustleHub.BusinessArea.Repository;
-using HustleHub.DataContext.Data;
+using HustleHub_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
