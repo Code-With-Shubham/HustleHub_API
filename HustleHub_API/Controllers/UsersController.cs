@@ -1,6 +1,10 @@
 ﻿using HustleHub.BusinessArea.Interface;
 using HustleHub.BusinessArea.Models.APIResponse;
-using HustleHub.BusinessArea.Models.BusinessModels;
+using HustleHub.BusinessArea.Repository;
+using HustleHub_API.BusinessLogic.Models.BusinessModels;
+using HustleHub_API.DBContext.Entities.TableEntities;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,37 +14,50 @@ namespace HustleHub_API.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly IRepository objRep;
+        private readonly IRepository _repository;
         private readonly IConfiguration _configuration;
         private readonly ILogger<UsersController> _logger;
 
         public UsersController(IRepository repository, IConfiguration configuration, ILogger<UsersController> logger)
         {
             _configuration = configuration;
-            objRep = repository;
+            _repository = repository;
             _logger = logger;
-            _logger.LogInformation("\n\nUsersController Logs : \n");
+            _logger.LogInformation("\n\n UsersController Logs : \n");
         }
 
-        [Route("UserRegistration")]
-        [HttpPost]
-        public async Task<APIResponse> RegisterUser([FromBody] Users model)
+        // GET: api/Student
+        // GET: api/Student
+        [HttpGet]
+        [EnableCors("MyCorsPolicy")]
+        public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
         {
-            APIResponse result = new APIResponse();
+            var students = await _repository.GetAllStudentsAsync();
+            return Ok(students);
+        }
 
-            try
-            {
+        // GET: api/Student/{email}
+        [HttpGet("{email}")]
+        [EnableCors("MyCorsPolicy")]
+        public async Task<ActionResult<Student>> GetStudent(string email)
+        {
+            var student = await _repository.GetStudentByEmailAsync(email);
 
-                result = await objRep.RegisterUserAsync(model);
-                return result;
-            }
-            catch (Exception ex)
+            if (student == null)
             {
-                result.Code = 500;
-                result.Status = "error";
-                result.Message = ex.Message;
-                return result;
+                return NotFound();
             }
+
+            return Ok(student);
+        }
+
+        // POST: api/Student/Register
+        [HttpPost("Register")]
+        [EnableCors("MyCorsPolicy")]
+        public async Task<ActionResult<APIResponse>> RegisterStudent([FromForm] Students model, IFormFile? profilePicFile)
+        {
+            var result = await _repository.RegisterStudentAsync(model, profilePicFile);
+            return StatusCode(result.Code, result);
         }
 
     }

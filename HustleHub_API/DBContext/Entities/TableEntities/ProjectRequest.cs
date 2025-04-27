@@ -10,32 +10,52 @@ namespace HustleHub_API.DBContext.Entities.TableEntities;
 public partial class ProjectRequest
 {
     [Key]
-    public int Id { get; set; }
+    [Column("RPID")]
+    public int Rpid { get; set; }
 
-    [StringLength(15)]
-    public string Mobile { get; set; } = null!;
+    [StringLength(150)]
+    public string Email { get; set; } = null!;
 
     [StringLength(100)]
-    public string ProjectType { get; set; } = null!;
+    public string? ProjectType { get; set; }
 
     [StringLength(50)]
-    public string ProjectLevel { get; set; } = null!;
+    public string? ComplexityLevel { get; set; }
 
-    public string ProjectDescription { get; set; } = null!;
+    public string? Description { get; set; }
 
-    [StringLength(255)]
-    public string? Documents { get; set; }
+    public string? ProjectDocs { get; set; }
 
+    [StringLength(15)]
+    public string? Mobile { get; set; }
+
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal? Budget { get; set; }
+
+    [Column("TCStatus")]
     [StringLength(50)]
-    public string BudgetRange { get; set; } = null!;
+    public string? Tcstatus { get; set; }
 
     [Column(TypeName = "datetime")]
-    public DateTime? CreatedAt { get; set; }
+    public DateTime? RequestDate { get; set; }
 
     [Column(TypeName = "datetime")]
-    public DateTime? UpdatedAt { get; set; }
+    public DateTime? UpdateDate { get; set; }
 
-    [ForeignKey("Mobile")]
+    public int? UpdateCount { get; set; }
+
+    public bool? Status { get; set; }
+
+    [StringLength(150)]
+    public string? ApprovedBy { get; set; }
+
+    [Column(TypeName = "datetime")]
+    public DateTime? ApprovedDate { get; set; }
+
+    [ForeignKey("Email")]
     [InverseProperty("ProjectRequests")]
-    public virtual User MobileNavigation { get; set; } = null!;
+    public virtual Student EmailNavigation { get; set; } = null!;
+
+    [InverseProperty("Rp")]
+    public virtual ICollection<StudentInfo> StudentInfos { get; set; } = new List<StudentInfo>();
 }

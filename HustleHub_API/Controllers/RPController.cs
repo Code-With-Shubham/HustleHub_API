@@ -1,6 +1,5 @@
 ﻿using HustleHub.BusinessArea.Interface;
 using HustleHub.BusinessArea.Models.APIResponse;
-using HustleHub.BusinessArea.Models.BusinessModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,25 +21,25 @@ namespace HustleHub_API.Controllers
             _logger.LogInformation("\n\nRPController Logs : \n");
         }
 
-        [Route("RequiredProject")]
-        [HttpPost]
-        public async Task<APIResponse> RequiredProject([FromBody] ProjectReq model)
-        {
-            APIResponse result = new APIResponse();
+        //[Route("RequiredProject")]
+        //[HttpPost]
+        //public async Task<APIResponse> RequiredProject([FromBody] ProjectReq model)
+        //{
+        //    APIResponse result = new APIResponse();
 
-            try
-            {
+        //    try
+        //    {
 
-                result = await objRep.RequiredProjectAsync(model);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                result.Code = 500;
-                result.Status = "error";
-                result.Message = ex.Message;
-                return result;
-            }
-        }
+        //        result = await objRep.RequiredProjectAsync(model);
+        //        return result;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        result.Code = 500;
+        //        result.Status = "error";
+        //        result.Message = ex.Message;
+        //        return result;
+        //    }
+        //}
     }
 }
