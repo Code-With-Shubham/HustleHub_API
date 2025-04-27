@@ -14,6 +14,7 @@ namespace HustleHub_API.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
+
         private readonly IRepository _repository;
         private readonly IConfiguration _configuration;
         private readonly ILogger<UsersController> _logger;
