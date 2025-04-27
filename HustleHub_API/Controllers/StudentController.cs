@@ -12,14 +12,14 @@ namespace HustleHub_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public class StudentController : ControllerBase
     {
 
         private readonly IRepository _repository;
         private readonly IConfiguration _configuration;
-        private readonly ILogger<UsersController> _logger;
+        private readonly ILogger<StudentController> _logger;
 
-        public UsersController(IRepository repository, IConfiguration configuration, ILogger<UsersController> logger)
+        public StudentController(IRepository repository, IConfiguration configuration, ILogger<StudentController> logger)
         {
             _configuration = configuration;
             _repository = repository;

@@ -1,0 +1,35 @@
+create table Item
+(
+	Item_Number int primary key,
+	Name varchar(50),
+	Item_value int,
+	Color varchar(50),
+	Size varchar(50)
+);
+
+create table Customer 
+(
+	Customer_Number int primary key,
+	Name varchar(50),
+	Contact_Number varchar(12),
+	Address varchar(100),
+	Email varchar(100)
+)
+
+create table Orders
+(
+	Order_Number int primary key,
+	Order_Date date,
+	Customer_Number int,
+	FOREIGN KEY (Customer_Number) REFERENCES Customer(Customer_Number),
+	Item_Number int,
+	FOREIGN KEY (Item_Number) REFERENCES Item(Item_Number)
+)
+
+create table Delivery
+(
+	Order_Number int,
+	FOREIGN KEY (Order_Number) REFERENCES Orders(Order_Number),
+	Delivery_Date date,
+	Payment_Mode varchar(50),
+)

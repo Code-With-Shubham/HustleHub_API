@@ -1,4 +1,5 @@
-﻿using HustleHub.BusinessArea.Interface;
+﻿using Azure;
+using HustleHub.BusinessArea.Interface;
 using HustleHub.BusinessArea.Models.APIResponse;
 using HustleHub_API.BusinessLogic.Models.BusinessModels;
 using HustleHub_API.Data;
@@ -104,5 +105,100 @@ namespace HustleHub.BusinessArea.Repository
         {
             return await _dbcontext.Students.FirstOrDefaultAsync(s => s.Email == email);
         }
+
+
+
+
+        // Project
+
+        // Get all ProjectRequests
+        public async Task<IEnumerable<ProjectRequest>> GetProjectRequestsAsync()
+        {
+            return await _dbcontext.ProjectRequests.ToListAsync();
+        }
+
+        // Get a specific ProjectRequest by its ID
+        public async Task<ProjectRequest> GetProjectRequestByIdAsync(int id)
+        {
+            return await _dbcontext.ProjectRequests
+                .Include(pr => pr.EmailNavigation)  // If you want to include related Student data
+                .FirstOrDefaultAsync(pr => pr.Rpid == id);
+        }
+
+        // Create a new ProjectRequest
+        // Create a new ProjectRequest
+        public async Task<APIResponse> CreateProjectRequestAsync(ProjectRequestVM model, IFormFile projectDocsFile)
+        {
+            APIResponse response = new();
+            try
+            {
+                string projectDocsFileName = null;
+
+                // Handle file upload if projectDocsFile is provided
+                if (projectDocsFile != null && projectDocsFile.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(_environment.ContentRootPath, "Uploads", "ProjectDocs");
+
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
+
+                    projectDocsFileName = Guid.NewGuid().ToString() + Path.GetExtension(projectDocsFile.FileName);
+                    var filePath = Path.Combine(uploadsFolder, projectDocsFileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await projectDocsFile.CopyToAsync(stream);
+                    }
+                }
+
+                // Create a new ProjectRequest object and map the model data
+                var projectRequest = new ProjectRequest
+                {
+                    Email = model.Email,
+                    ProjectType = model.ProjectType,
+                    ComplexityLevel = model.ComplexityLevel,
+                    Description = model.Description,
+                    ProjectDocs = projectDocsFileName,
+                    Mobile = model.Mobile,
+                    Budget = model.Budget,
+                    Tcstatus = model.Tcstatus,
+                    RequestDate = DateTime.Now,
+                    Status = true,
+                    ApprovedBy = model.ApprovedBy,
+                    ApprovedDate = model.ApprovedDate
+                };
+
+                // Add the ProjectRequest to the database
+                await _dbcontext.ProjectRequests.AddAsync(projectRequest);
+                int cnt = await _dbcontext.SaveChangesAsync();
+
+                // Check if the ProjectRequest was successfully saved
+                if (cnt > 0)
+                {
+                    response.Code = 200;
+                    response.Status = "success";
+                    response.Message = "Project Request Created Successfully.";
+                }
+                else
+                {
+                    response.Code = 500;
+                    response.Status = "error";
+                    response.Message = "Failed to save data.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Code = 500;
+                response.Status = "error";
+                response.Message = ex.Message;
+            }
+
+            return response;
+        }
+
+        // Get ProjectRequest by Email
+       
     }
 }
