@@ -1,0 +1,14 @@
+﻿services:
+  - type: web
+    name: hustlehub-api
+    env: docker
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    plan: free
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        value: Server=hustlehub.cfw6scimuwug.ap-south-1.rds.amazonaws.com,1433;Database=hustlehubdb;User Id=hustlehub;Password=Manohares;TrustServerCertificate=True;
+      - key: XApiKey
+        value: pgH7QzFHJx4w46fI~6Uzi4RvtTwlEXp
