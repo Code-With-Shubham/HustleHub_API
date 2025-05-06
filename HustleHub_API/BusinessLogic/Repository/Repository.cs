@@ -104,5 +104,65 @@ namespace HustleHub.BusinessArea.Repository
         {
             return await _dbcontext.Students.FirstOrDefaultAsync(s => s.Email == email);
         }
+
+
+        //Project Requirement
+
+        public async Task<APIResponse> SubmitProjectRequestAsync(Projects model, IFormFile? projectDocFile)
+        {
+            try
+            {
+                if (model.Email == null)
+                {
+                    return new APIResponse { Code = 400, Message = "Email cannot be null", Status = "error" };
+                }
+                if (projectDocFile != null && projectDocFile.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
+                    Directory.CreateDirectory(uploadsFolder);
+
+                    var filePath = Path.Combine(uploadsFolder, projectDocFile.FileName);
+                    using var stream = new FileStream(filePath, FileMode.Create);
+                    await projectDocFile.CopyToAsync(stream);
+
+                    model.ProjectDocsFile = projectDocFile.FileName;
+                }
+
+                ProjectRequest project = new ProjectRequest
+                {
+                    Rpid = model.Id,
+                    Email = model.Email,
+                    ProjectType = model.ProjectType,
+                    ComplexityLevel = model.ComplexityLevel,
+                    Description = model.Description,
+                    ProjectDocs = model.ProjectDocsFile,
+                    Mobile = model.Mobile,
+                    Budget = model.Budget,
+                    Tcstatus = model.Tcstatus,
+                    ApprovedBy = model.ApprovedBy,
+                    ApprovedDate = model.ApprovedDate,
+                    UpdateDate = DateTime.UtcNow,
+                };
+
+                _dbcontext.ProjectRequests.Add(project);
+                await _dbcontext.SaveChangesAsync();
+
+                return new APIResponse { Code = 200, Message = "Project request submitted successfully", Status="success" };
+            }
+            catch (Exception ex)
+            {
+                return new APIResponse { Code = 500, Message = "Error: " + ex.Message, Status = "error" };
+            }
+        }
+
+
+        public async Task<IEnumerable<ProjectRequest>> GetAllProjectsAsync()
+        {
+            return await _dbcontext.ProjectRequests
+                                 .OrderByDescending(p => p.UpdateDate)
+                                 .ToListAsync();
+        }
+
+
     }
 }
