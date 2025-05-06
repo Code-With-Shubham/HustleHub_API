@@ -5,8 +5,6 @@ using HustleHub_API.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +36,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "HustleHub", Version = "v1" });
+
     c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
     {
         Description = "ApiKey must appear in header",
@@ -46,6 +45,7 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Scheme = "ApiKeyScheme"
     });
+
     var key = new OpenApiSecurityScheme()
     {
         Reference = new OpenApiReference
@@ -55,14 +55,16 @@ builder.Services.AddSwaggerGen(c =>
         },
         In = ParameterLocation.Header
     };
+
     var requirement = new OpenApiSecurityRequirement
-                    {
-                             { key, new List<string>() }
-                    };
+    {
+        { key, new List<string>() }
+    };
+
     c.AddSecurityRequirement(requirement);
 });
 
-// CORS Policy (Optional)
+// CORS Policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyCorsPolicy", builder =>
@@ -77,7 +79,7 @@ var app = builder.Build();
 
 // --- Middlewares ---
 
-// Swagger
+// Swagger UI
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -93,7 +95,7 @@ if (!Directory.Exists(uploadsPath)) Directory.CreateDirectory(uploadsPath);
 if (!Directory.Exists(imagesPath)) Directory.CreateDirectory(imagesPath);
 if (!Directory.Exists(documentsPath)) Directory.CreateDirectory(documentsPath);
 
-// Serve static files (Uploads)
+// Serve static files
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(uploadsPath),
@@ -103,10 +105,11 @@ app.UseStaticFiles(new StaticFileOptions
 // CORS
 app.UseCors("MyCorsPolicy");
 
-// API Key Middleware (Check API key for all routes except public ones)
+// API Key Middleware
 app.UseMiddleware<ApiKeyMiddleware>();
 
-app.UseHttpsRedirection();
+// No HTTPS redirection on Render
+// app.UseHttpsRedirection(); // Commented/Removed to avoid Render HTTPS port error
 
 app.UseAuthorization();
 
