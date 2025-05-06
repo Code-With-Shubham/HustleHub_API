@@ -97,8 +97,29 @@ namespace HustleHub.BusinessArea.Repository
 
         public async Task<List<Student>> GetAllStudentsAsync()
         {
-            return await _dbcontext.Students.ToListAsync();
+            var students = await _dbcontext.Students.ToListAsync();
+
+            foreach (var student in students)
+            {
+                if (!string.IsNullOrEmpty(student.ProfilePic))
+                {
+                    var imagePath = Path.Combine(_environment.ContentRootPath, "Uploads", "Images", student.ProfilePic);
+                    if (File.Exists(imagePath))
+                    {
+                        // Convert the image to a Base64 string
+                        var imageBytes = await File.ReadAllBytesAsync(imagePath);
+                        student.ProfilePic = Convert.ToBase64String(imageBytes);
+                    }
+                    else
+                    {
+                        student.ProfilePic = null; // If the file doesn't exist, set it to null
+                    }
+                }
+            }
+
+            return students;
         }
+
 
         public async Task<Student?> GetStudentByEmailAsync(string email)
         {
@@ -158,10 +179,31 @@ namespace HustleHub.BusinessArea.Repository
 
         public async Task<IEnumerable<ProjectRequest>> GetAllProjectsAsync()
         {
-            return await _dbcontext.ProjectRequests
-                                 .OrderByDescending(p => p.UpdateDate)
-                                 .ToListAsync();
+            var projects = await _dbcontext.ProjectRequests
+                                           .OrderByDescending(p => p.UpdateDate)
+                                           .ToListAsync();
+
+            foreach (var project in projects)
+            {
+                if (!string.IsNullOrEmpty(project.ProjectDocs))
+                {
+                    var documentPath = Path.Combine(_environment.ContentRootPath, "Uploads", "Documents", project.ProjectDocs);
+                    if (File.Exists(documentPath))
+                    {
+                        // Convert the document to a Base64 string
+                        var documentBytes = await File.ReadAllBytesAsync(documentPath);
+                        project.ProjectDocs = Convert.ToBase64String(documentBytes);
+                    }
+                    else
+                    {
+                        project.ProjectDocs = null; // If the file doesn't exist, set it to null
+                    }
+                }
+            }
+
+            return projects;
         }
+
 
 
     }
