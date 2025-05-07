@@ -204,6 +204,28 @@ namespace HustleHub.BusinessArea.Repository
             return projects;
         }
 
+        public async Task<ProjectRequest?> GetProjectByIdAsync(int id) // Updated return type to allow nullability
+        {
+            var project = await _dbcontext.ProjectRequests
+                                          .FirstOrDefaultAsync(p => p.Rpid == id);
+
+            if (project != null && !string.IsNullOrEmpty(project.ProjectDocs))
+            {
+                var documentPath = Path.Combine(_environment.ContentRootPath, "Uploads", "Documents", project.ProjectDocs);
+                if (File.Exists(documentPath))
+                {
+                    var documentBytes = await File.ReadAllBytesAsync(documentPath);
+                    project.ProjectDocs = Convert.ToBase64String(documentBytes);
+                }
+
+                else
+                {
+                    project.ProjectDocs = null;
+                }
+            }
+
+            return project; // No CS8603 warning since the method now explicitly allows null return
+        }
 
 
     }

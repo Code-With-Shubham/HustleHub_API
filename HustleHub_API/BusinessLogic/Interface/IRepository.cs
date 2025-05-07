@@ -19,6 +19,7 @@ namespace HustleHub.BusinessArea.Interface
         //Project Requirement   
         Task<APIResponse> SubmitProjectRequestAsync(Projects model, IFormFile? projectDocFile);
         Task<IEnumerable<ProjectRequest>> GetAllProjectsAsync();
+        Task<ProjectRequest?> GetProjectByIdAsync(int id);
 
 
     }

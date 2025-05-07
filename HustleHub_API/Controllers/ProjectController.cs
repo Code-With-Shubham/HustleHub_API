@@ -16,6 +16,7 @@ namespace HustleHub_API.Controllers
         private readonly IConfiguration _configuration;
         private readonly ILogger<ProjectController> _logger;
 
+
         public ProjectController(IRepository repository, IConfiguration configuration, ILogger<ProjectController> logger)
         {
             _configuration = configuration;
@@ -36,6 +37,13 @@ namespace HustleHub_API.Controllers
         public async Task<IActionResult> GetAllProjects()
         {
             var projects = await objRep.GetAllProjectsAsync();
+            return Ok(projects);
+        }
+
+        [HttpGet("GetProject")]
+        public async Task<IActionResult> GetProjects([FromHeader] int id)
+        {
+            var projects = await objRep.GetProjectByIdAsync(id);
             return Ok(projects);
         }
 
