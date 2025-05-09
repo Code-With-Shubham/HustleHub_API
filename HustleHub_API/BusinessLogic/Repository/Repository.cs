@@ -233,62 +233,183 @@ namespace HustleHub.BusinessArea.Repository
 
 
         //Admin Project
-        public async Task<APIResponse> AddAdminProjectAsync(AdminProjectDTO model)
+        public async Task<APIResponse> AddAdminProjectAsync(AdminProjectDTO model, IFormFile? ProjectIconImage)
         {
-            try
-            {
-                model.CreatedAt = DateTime.UtcNow;
-                model.UpdatedAt = null;
-                AdminProject obj = new AdminProject
-                {
-                    YoutubeLink = model.YoutubeLink,
-                    PreviewLink = model.PreviewLink,
-                    ProjectDescription = model.ProjectDescription,
-                    Skill = model.Skill,
-                    BasePrice = model.BasePrice,
-                    PremiumPrice = model.PremiumPrice,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = null,
-                    DisplayStatus = true
-                };
-                _dbcontext.AdminProjects.Add(obj);
-                await _dbcontext.SaveChangesAsync();
+            var strategy = _dbcontext.Database.CreateExecutionStrategy();
 
-                return new APIResponse
-                {
-                    Code = 200,
-                    Status = "success",
-                    Message = "Admin project added successfully."
-                };
-            }
-            catch (Exception ex)
+            return await strategy.ExecuteAsync(async () =>
             {
-                return new APIResponse
+                await using var transaction = await _dbcontext.Database.BeginTransactionAsync();
+
+                try
                 {
-                    Code = 500,
-                    Status = "error",
-                    Message = $"Error: {ex.Message}"
-                };
-            }
+                    string? ProjectIcon = null;
+
+                    // Upload Project Icon before starting DB operations
+                    if (ProjectIconImage != null && ProjectIconImage.Length > 0)
+                    {
+                        var uploadsFolder = Path.Combine(_environment.ContentRootPath, "Uploads", "ProjectIcons");
+
+                        if (!Directory.Exists(uploadsFolder))
+                            Directory.CreateDirectory(uploadsFolder);
+
+                        ProjectIcon = model.ProjectName + Guid.NewGuid().ToString() + Path.GetExtension(ProjectIconImage.FileName);
+                        var filePath = Path.Combine(uploadsFolder, ProjectIcon);
+
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await ProjectIconImage.CopyToAsync(stream);
+                        }
+                    }
+
+                    model.CreatedAt = DateTime.UtcNow;
+                    model.UpdatedAt = null;
+
+                    var obj = new AdminProject
+                    {
+                        YoutubeLink = model.YoutubeLink,
+                        ProjectName = model.ProjectName,
+                        LearningOutcomes = model.LearningOutcomes,
+                        Description1 = model.Description1,
+                        LongDescription = model.LongDescription,
+                        Description2 = model.Description2,
+                        Image = ProjectIcon,
+                        Category = model.Category,
+                        BasePrice = model.BasePrice,
+                        PremiumPrice = model.PremiumPrice,
+                        CreatedAt = model.CreatedAt,
+                        UpdatedAt = model.UpdatedAt,
+                        DisplayStatus = true
+                    };
+
+                    _dbcontext.AdminProjects.Add(obj);
+                    await _dbcontext.SaveChangesAsync();
+
+                    if (model.Skills != null && model.Skills.Any())
+                    {
+                        var projectSkills = model.Skills.Select(skill => new ProjectSkill
+                        {
+                            ProjectId = obj.ProjectId,
+                            SkillName = skill
+                        });
+
+                        _dbcontext.ProjectSkills.AddRange(projectSkills);
+                        await _dbcontext.SaveChangesAsync();
+                    }
+
+                    await transaction.CommitAsync();
+
+                    return new APIResponse
+                    {
+                        Code = 200,
+                        Status = "success",
+                        Message = "Admin project and skills added successfully."
+                    };
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new APIResponse
+                    {
+                        Code = 500,
+                        Status = "error",
+                        Message = $"Error: {ex.Message}"
+                    };
+                }
+            });
         }
 
-        public async Task<IEnumerable<AdminProject>> GetAllAdminProjectsAsync()
+
+
+        public async Task<IEnumerable<AdminProjectDTO>> GetAllAdminProjectsAsync()
         {
-            return  await _dbcontext.AdminProjects
-                                           .OrderByDescending(p => p.CreatedAt)
-                                           .ToListAsync();
+            var projects = await _dbcontext.AdminProjects
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
+            var response = new List<AdminProjectDTO>();
+
+            foreach (var project in projects)
+            {
+                string? imageBase64 = null;
+                if (!string.IsNullOrEmpty(project.Image))
+                {
+                    var filePath = Path.Combine(_environment.ContentRootPath, "Uploads", "projectIcons", project.Image);
+                    if (File.Exists(filePath))
+                    {
+                        var bytes = await File.ReadAllBytesAsync(filePath);
+                        imageBase64 = Convert.ToBase64String(bytes);
+                    }
+                }
+
+                // Get skills
+                var skills = await _dbcontext.ProjectSkills
+                    .Where(s => s.ProjectId == project.ProjectId)
+                    .Select(s => s.SkillName)
+                    .ToListAsync();
+
+                response.Add(new AdminProjectDTO
+                {
+                    ProjectId = project.ProjectId,
+                    YoutubeLink = project.YoutubeLink,
+                    ProjectName = project.ProjectName,
+                    Description1 = project.Description1,
+                    LongDescription = project.LongDescription,
+                    Description2 = project.Description2,
+                    Category = project.Category,
+                    LearningOutcomes = project.LearningOutcomes,
+                    BasePrice = project.BasePrice,
+                    PremiumPrice = project.PremiumPrice,
+                    CreatedAt = project.CreatedAt,
+                    Image = imageBase64,
+                    Skills = skills
+                });
+            }
+
+            return response;
         }
-        
-        public async Task<AdminProject?> GetAdminProjectByIdAsync(int id)
+
+
+
+        public async Task<AdminProjectDTO?> GetAdminProjectByIdAsync(int id)
         {
-            var project = await _dbcontext.AdminProjects
-                                          .FirstOrDefaultAsync(p => p.ProjectId == id);
+            var project = await _dbcontext.AdminProjects.FirstOrDefaultAsync(p => p.ProjectId == id);
 
             if (project == null)
-            {
                 return null;
+
+            string? imageBase64 = null;
+            if (!string.IsNullOrEmpty(project.Image))
+            {
+                var filePath = Path.Combine(_environment.ContentRootPath, "Uploads", "projectIcons", project.Image);
+                if (File.Exists(filePath))
+                {
+                    var bytes = await File.ReadAllBytesAsync(filePath);
+                    imageBase64 = Convert.ToBase64String(bytes);
+                }
             }
-            return project;
+
+            var skills = await _dbcontext.ProjectSkills
+                .Where(s => s.ProjectId == project.ProjectId)
+                .Select(s => s.SkillName)
+                .ToListAsync();
+
+            return new AdminProjectDTO
+            {
+                ProjectId = project.ProjectId,
+                YoutubeLink = project.YoutubeLink,
+                ProjectName = project.ProjectName,
+                Description1 = project.Description1,
+                LongDescription = project.LongDescription,
+                Description2 = project.Description2,
+                Category = project.Category,
+                LearningOutcomes = project.LearningOutcomes,
+                BasePrice = project.BasePrice,
+                PremiumPrice = project.PremiumPrice,
+                CreatedAt = project.CreatedAt,
+                Image = imageBase64,
+                Skills = skills
+            };
         }
 
 

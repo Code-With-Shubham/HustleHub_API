@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <Folder Include="BusinessLogic\Models\APIRequests\" />
+    <Folder Include="Uploads\ProjectIcons\" />
   </ItemGroup>
 
 </Project>

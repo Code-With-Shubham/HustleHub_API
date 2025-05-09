@@ -4,6 +4,7 @@ using HustleHub_API.BusinessLogic.Models;
 using HustleHub_API.DBContext.Entities.TableEntities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static HustleHub.BusinessArea.Interface.IRepository;
 
 namespace HustleHub_API.Controllers
 {
@@ -11,7 +12,7 @@ namespace HustleHub_API.Controllers
     [ApiController]
     public class AdminProjectController : ControllerBase
     {
-        private readonly IRepository objRep;
+        private readonly HustleHub.BusinessArea.Interface.IRepository objRep;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AdminProjectController> _logger;
 
@@ -25,9 +26,9 @@ namespace HustleHub_API.Controllers
         }
 
         [HttpPost("Add")]
-        public async Task<IActionResult> AddAdminProject([FromBody] AdminProjectDTO model)
+        public async Task<IActionResult> AddAdminProject([FromForm] AdminProjectDTO model, IFormFile? ProjectIconImage)
         {
-            var result = await objRep.AddAdminProjectAsync(model);
+            var result = await objRep.AddAdminProjectAsync(model, ProjectIconImage);
             return StatusCode(result.Code, result);
         }
 

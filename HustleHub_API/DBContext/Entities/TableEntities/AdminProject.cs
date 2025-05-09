@@ -15,12 +15,21 @@ public partial class AdminProject
 
     public string? YoutubeLink { get; set; }
 
-    public string? PreviewLink { get; set; }
+    [StringLength(255)]
+    public string? ProjectName { get; set; }
 
-    public string? ProjectDescription { get; set; }
+    public string? Description1 { get; set; }
 
-    [StringLength(200)]
-    public string? Skill { get; set; }
+    public string? LongDescription { get; set; }
+
+    public string? Description2 { get; set; }
+
+    public string? Image { get; set; }
+
+    [StringLength(100)]
+    public string? Category { get; set; }
+
+    public string? LearningOutcomes { get; set; }
 
     [Column(TypeName = "decimal(18, 2)")]
     public decimal? BasePrice { get; set; }
@@ -35,6 +44,9 @@ public partial class AdminProject
     public DateTime? UpdatedAt { get; set; }
 
     public bool? DisplayStatus { get; set; }
+
+    [InverseProperty("Project")]
+    public virtual ICollection<ProjectSkill> ProjectSkills { get; set; } = new List<ProjectSkill>();
 
     [InverseProperty("Project")]
     public virtual ICollection<StudentInfo> StudentInfos { get; set; } = new List<StudentInfo>();
