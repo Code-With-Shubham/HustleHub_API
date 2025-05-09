@@ -138,21 +138,24 @@ namespace HustleHub.BusinessArea.Repository
                 {
                     return new APIResponse { Code = 400, Message = "Email cannot be null", Status = "error" };
                 }
+
                 if (projectDocFile != null && projectDocFile.Length > 0)
                 {
-                    var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
-                    Directory.CreateDirectory(uploadsFolder);
+                    // Create the full path uploads/ProjectDocs
+                    var uploadsFolder = Path.Combine(_environment.WebRootPath ?? Directory.GetCurrentDirectory(), "uploads", "ProjectDocs");
+                    Directory.CreateDirectory(uploadsFolder); // Ensure folder exists
 
+                    // Save the file
                     var filePath = Path.Combine(uploadsFolder, projectDocFile.FileName);
                     using var stream = new FileStream(filePath, FileMode.Create);
                     await projectDocFile.CopyToAsync(stream);
 
-                    model.ProjectDocsFile = projectDocFile.FileName;
+                    // Store file name in DB (or relative path if needed)
+                    model.ProjectDocsFile = Path.Combine("uploads", "ProjectDocs", projectDocFile.FileName);
                 }
 
                 ProjectRequest project = new ProjectRequest
-                {
-                    Rpid = model.Id,
+                { 
                     Email = model.Email,
                     ProjectType = model.ProjectType,
                     ComplexityLevel = model.ComplexityLevel,
@@ -169,13 +172,14 @@ namespace HustleHub.BusinessArea.Repository
                 _dbcontext.ProjectRequests.Add(project);
                 await _dbcontext.SaveChangesAsync();
 
-                return new APIResponse { Code = 200, Message = "Project request submitted successfully", Status="success" };
+                return new APIResponse { Code = 200, Message = "Project request submitted successfully", Status = "success" };
             }
             catch (Exception ex)
             {
                 return new APIResponse { Code = 500, Message = "Error: " + ex.Message, Status = "error" };
             }
         }
+
 
 
         public async Task<IEnumerable<ProjectRequest>> GetAllProjectsAsync()
@@ -188,7 +192,7 @@ namespace HustleHub.BusinessArea.Repository
             {
                 if (!string.IsNullOrEmpty(project.ProjectDocs))
                 {
-                    var documentPath = Path.Combine(_environment.ContentRootPath, "Uploads", "Documents", project.ProjectDocs);
+                    var documentPath = Path.Combine(_environment.ContentRootPath, "Uploads", "ProjectDocs", project.ProjectDocs);
                     if (File.Exists(documentPath))
                     {
                         // Convert the document to a Base64 string
@@ -212,7 +216,7 @@ namespace HustleHub.BusinessArea.Repository
 
             if (project != null && !string.IsNullOrEmpty(project.ProjectDocs))
             {
-                var documentPath = Path.Combine(_environment.ContentRootPath, "Uploads", "Documents", project.ProjectDocs);
+                var documentPath = Path.Combine(_environment.ContentRootPath, "Uploads", "ProjectDocs", project.ProjectDocs);
                 if (File.Exists(documentPath))
                 {
                     var documentBytes = await File.ReadAllBytesAsync(documentPath);

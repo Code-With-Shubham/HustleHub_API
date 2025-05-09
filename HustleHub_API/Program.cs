@@ -89,7 +89,7 @@ if (app.Environment.IsDevelopment())
 // Create Upload folders if not exist
 var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
 var imagesPath = Path.Combine(uploadsPath, "Images");
-var documentsPath = Path.Combine(uploadsPath, "Documents");
+var documentsPath = Path.Combine(uploadsPath, "ProjectDocs");
 
 if (!Directory.Exists(uploadsPath)) Directory.CreateDirectory(uploadsPath);
 if (!Directory.Exists(imagesPath)) Directory.CreateDirectory(imagesPath);
