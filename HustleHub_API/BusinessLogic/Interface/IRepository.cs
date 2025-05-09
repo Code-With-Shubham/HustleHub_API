@@ -1,4 +1,5 @@
 ﻿using HustleHub.BusinessArea.Models.APIResponse;
+using HustleHub_API.BusinessLogic.Models;
 using HustleHub_API.BusinessLogic.Models.BusinessModels;
 using HustleHub_API.DBContext.Entities.TableEntities;
 using System;
@@ -20,6 +21,12 @@ namespace HustleHub.BusinessArea.Interface
         Task<APIResponse> SubmitProjectRequestAsync(Projects model, IFormFile? projectDocFile);
         Task<IEnumerable<ProjectRequest>> GetAllProjectsAsync();
         Task<ProjectRequest?> GetProjectByIdAsync(int id);
+
+        //Admin Project
+        Task<APIResponse> AddAdminProjectAsync(AdminProjectDTO model);
+        Task<IEnumerable<AdminProject>> GetAllAdminProjectsAsync();
+        Task<AdminProject?> GetAdminProjectByIdAsync(int id);
+
 
 
     }

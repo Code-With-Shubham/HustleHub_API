@@ -1,5 +1,6 @@
 ﻿using HustleHub.BusinessArea.Interface;
 using HustleHub.BusinessArea.Models.APIResponse;
+using HustleHub_API.BusinessLogic.Models;
 using HustleHub_API.BusinessLogic.Models.BusinessModels;
 using HustleHub_API.Data;
 using HustleHub_API.DBContext.Entities.TableEntities;
@@ -225,6 +226,69 @@ namespace HustleHub.BusinessArea.Repository
             }
 
             return project; // No CS8603 warning since the method now explicitly allows null return
+        }
+
+
+
+
+
+        //Admin Project
+        public async Task<APIResponse> AddAdminProjectAsync(AdminProjectDTO model)
+        {
+            try
+            {
+                model.CreatedAt = DateTime.UtcNow;
+                model.UpdatedAt = null;
+                AdminProject obj = new AdminProject
+                {
+                    YoutubeLink = model.YoutubeLink,
+                    PreviewLink = model.PreviewLink,
+                    ProjectDescription = model.ProjectDescription,
+                    Skill = model.Skill,
+                    BasePrice = model.BasePrice,
+                    PremiumPrice = model.PremiumPrice,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = null,
+                    DisplayStatus = true
+                };
+                _dbcontext.AdminProjects.Add(obj);
+                await _dbcontext.SaveChangesAsync();
+
+                return new APIResponse
+                {
+                    Code = 200,
+                    Status = "success",
+                    Message = "Admin project added successfully."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new APIResponse
+                {
+                    Code = 500,
+                    Status = "error",
+                    Message = $"Error: {ex.Message}"
+                };
+            }
+        }
+
+        public async Task<IEnumerable<AdminProject>> GetAllAdminProjectsAsync()
+        {
+            return  await _dbcontext.AdminProjects
+                                           .OrderByDescending(p => p.CreatedAt)
+                                           .ToListAsync();
+        }
+        
+        public async Task<AdminProject?> GetAdminProjectByIdAsync(int id)
+        {
+            var project = await _dbcontext.AdminProjects
+                                          .FirstOrDefaultAsync(p => p.ProjectId == id);
+
+            if (project == null)
+            {
+                return null;
+            }
+            return project;
         }
 
 
