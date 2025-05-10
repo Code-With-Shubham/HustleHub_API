@@ -25,6 +25,7 @@ namespace HustleHub_API.Controllers
             _logger.LogInformation("\n\nRPController Logs : \n");
         }
 
+
         [Route("RegisterProject")]
         [HttpPost]
         public async Task<IActionResult> Submit([FromForm] RequiredProjectDTO model, IFormFile? projectDocsFile)
