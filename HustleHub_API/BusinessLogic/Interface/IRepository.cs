@@ -30,6 +30,7 @@ namespace HustleHub.BusinessArea.Interface
 
         Task<APIResponse> AddCategoryAsync(CategoryDTO model);
         Task<IEnumerable<CategoryDTO>> GetAllCategoriesAsync();
+        Task<APIResponse> AdminLoginAsync(AdminLoginDTO model);
 
 
 

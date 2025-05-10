@@ -72,6 +72,16 @@ namespace HustleHub_API.Controllers
             return Ok(categories);
         }
 
+        [HttpPost("Login")]
+        public async Task<IActionResult> AdminLogin([FromBody] AdminLoginDTO model)
+        {
+            var result = await objRep.AdminLoginAsync(model);
+            return StatusCode(result.Code, result);
+        }
+
+
+
+
 
     }
 }

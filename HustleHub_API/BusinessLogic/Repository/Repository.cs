@@ -523,6 +523,41 @@ namespace HustleHub.BusinessArea.Repository
         }
 
 
+        public async Task<APIResponse> AdminLoginAsync(AdminLoginDTO model)
+        {
+            try
+            {
+                // Check if the admin exists in the database
+                var admin = await _dbcontext.AdminLogins
+                    .FirstOrDefaultAsync(a => a.Email == model.Email && a.Password == model.Password);
+
+                if (admin == null)
+                {
+                    return new APIResponse
+                    {
+                        Code = 401,
+                        Status = "error",
+                        Message = "Invalid email or password."
+                    };
+                }
+
+                return new APIResponse
+                {
+                    Code = 200,
+                    Status = "success",
+                    Message = "Login successful."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new APIResponse
+                {
+                    Code = 500,
+                    Status = "error",
+                    Message = $"Error: {ex.Message}"
+                };
+            }
+        }
 
 
     }
