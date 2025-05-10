@@ -27,6 +27,8 @@ namespace HustleHub.BusinessArea.Interface
         Task<IEnumerable<AdminProjectDTO>> GetAllAdminProjectsAsync();
         Task<AdminProjectDTO?> GetAdminProjectByIdAsync(int id);
 
+        Task<APIResponse> DeleteAdminProjectAsync(int projectId);
+
 
 
     }

@@ -49,5 +49,13 @@ namespace HustleHub_API.Controllers
             }
             return Ok(project);
         }
+
+        [HttpDelete("Delete/{id}")]
+        public async Task<IActionResult> DeleteAdminProject(int id)
+        {
+            var result = await objRep.DeleteAdminProjectAsync(id);
+            return StatusCode(result.Code, result);
+        }
+
     }
 }

@@ -132,6 +132,11 @@ namespace HustleHub.BusinessArea.Repository
         {
             try
             {
+                var mailcheck = await _dbcontext.Students.Where(x => x.Email == model.Email || x.Mobile == model.Mobile).FirstOrDefaultAsync();
+                if(mailcheck == null)
+                {
+                    return new APIResponse { Code = 400, Message = "This email id not registered", Status = "error" };
+                }
                 if (string.IsNullOrEmpty(model.Email))
                 {
                     return new APIResponse { Code = 400, Message = "Email cannot be null", Status = "error" };
@@ -403,6 +408,64 @@ namespace HustleHub.BusinessArea.Repository
                 Skills = skills
             };
         }
+        public async Task<APIResponse> DeleteAdminProjectAsync(int projectId)
+        {
+            try
+            {
+                // Find the AdminProject by ID
+                var project = await _dbcontext.AdminProjects
+                    .Include(p => p.ProjectSkills) // Include related skills
+                    .FirstOrDefaultAsync(p => p.ProjectId == projectId);
+
+                if (project == null)
+                {
+                    return new APIResponse
+                    {
+                        Code = 404,
+                        Status = "error",
+                        Message = "Admin project not found."
+                    };
+                }
+
+                // Delete related skills
+                if (project.ProjectSkills != null && project.ProjectSkills.Any())
+                {
+                    _dbcontext.ProjectSkills.RemoveRange(project.ProjectSkills);
+                }
+
+                // Delete the project icon file if it exists
+                if (!string.IsNullOrEmpty(project.Image))
+                {
+                    var filePath = Path.Combine(_environment.ContentRootPath, "Uploads", "ProjectIcons", project.Image);
+                    if (File.Exists(filePath))
+                    {
+                        File.Delete(filePath);
+                    }
+                }
+
+                // Delete the AdminProject
+                _dbcontext.AdminProjects.Remove(project);
+                await _dbcontext.SaveChangesAsync();
+
+                return new APIResponse
+                {
+                    Code = 200,
+                    Status = "success",
+                    Message = "Admin project deleted successfully."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new APIResponse
+                {
+                    Code = 500,
+                    Status = "error",
+                    Message = $"Error: {ex.Message}"
+                };
+            }
+        }
+
+
 
 
     }
