@@ -27,6 +27,46 @@ namespace HustleHub.BusinessArea.Repository
             _environment = environment;
         }
 
+        public async Task<APIResponse> StudentLoginAsync(StudentLoginDTO model)
+        {
+            try
+            {
+                // Check if the student exists in the database
+                var student = await _dbcontext.Students
+                    .FirstOrDefaultAsync(s => s.Email == model.Email && s.Password == model.Password);
+
+                if (student == null)
+                {
+                    return new APIResponse
+                    {
+                        Code = 401,
+                        Status = "error",
+                        Message = "Invalid email or password."
+                    };
+                }
+
+                // Update the last login time
+                //student.LastLoginAt = DateTime.UtcNow;
+                //_dbcontext.Students.Update(student);
+                //await _dbcontext.SaveChangesAsync();
+
+                return new APIResponse
+                {
+                    Code = 200,
+                    Status = "success",
+                    Message = "Login successful."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new APIResponse
+                {
+                    Code = 500,
+                    Status = "error",
+                    Message = $"Error: {ex.Message}"
+                };
+            }
+        }
 
         public async Task<APIResponse> RegisterStudentAsync(StudentDTO model, IFormFile? profilePicFile)
         {

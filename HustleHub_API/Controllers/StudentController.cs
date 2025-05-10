@@ -58,5 +58,14 @@ namespace HustleHub_API.Controllers
             var result = await _repository.RegisterStudentAsync(model, profilePicFile);
             return StatusCode(result.Code, result);
         }
+
+
+        [HttpPost("Login")]
+        public async Task<IActionResult> StudentLogin([FromBody] StudentLoginDTO model)
+        {
+            var result = await _repository.StudentLoginAsync(model);
+            return StatusCode(result.Code, result);
+        }
+
     }
 }

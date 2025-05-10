@@ -13,6 +13,7 @@ namespace HustleHub.BusinessArea.Interface
     public interface IRepository
     {
         //Student Registration
+        Task<APIResponse> StudentLoginAsync(StudentLoginDTO model);
         Task<APIResponse> RegisterStudentAsync(StudentDTO model, IFormFile? profilePicFile);
         Task<List<Student>> GetAllStudentsAsync();
         Task<Student?> GetStudentByEmailAsync(string email);
