@@ -27,7 +27,7 @@ namespace HustleHub_API.Controllers
 
         [Route("RegisterProject")]
         [HttpPost]
-        public async Task<IActionResult> Submit([FromForm] Projects model, IFormFile? projectDocsFile)
+        public async Task<IActionResult> Submit([FromForm] RequiredProjectDTO model, IFormFile? projectDocsFile)
         {
             var result = await objRep.SubmitProjectRequestAsync(model, projectDocsFile);
             return StatusCode(result.Code, result);

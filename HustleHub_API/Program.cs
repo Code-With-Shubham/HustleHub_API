@@ -46,7 +46,7 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "ApiKeyScheme"
     });
 
-    var key = new OpenApiSecurityScheme()
+    var key = new OpenApiSecurityScheme
     {
         Reference = new OpenApiReference
         {
@@ -105,15 +105,14 @@ app.UseStaticFiles(new StaticFileOptions
 // CORS
 app.UseCors("MyCorsPolicy");
 
-// API Key Middleware
+// Custom Middleware for API Key
 app.UseMiddleware<ApiKeyMiddleware>();
 
-// No HTTPS redirection on Render
-// app.UseHttpsRedirection(); // Commented/Removed to avoid Render HTTPS port error
+// Uncomment this if deploying somewhere HTTPS is fully supported
+// app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-// Controller Mapping
 app.MapControllers();
 
 app.Run();

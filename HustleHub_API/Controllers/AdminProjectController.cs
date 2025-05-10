@@ -22,7 +22,7 @@ namespace HustleHub_API.Controllers
             _configuration = configuration;
             objRep = repository;
             _logger = logger;
-            _logger.LogInformation("\n\nAdminProjectController : \n");
+            _logger.LogInformation("\n\n AdminProjectController : \n");
         }
 
         [HttpPost("Add")]

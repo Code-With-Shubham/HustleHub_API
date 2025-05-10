@@ -28,7 +28,7 @@ namespace HustleHub.BusinessArea.Repository
         }
 
 
-        public async Task<APIResponse> RegisterStudentAsync(Students model, IFormFile? profilePicFile)
+        public async Task<APIResponse> RegisterStudentAsync(StudentDTO model, IFormFile? profilePicFile)
         {
             APIResponse result = new APIResponse();
 
@@ -120,8 +120,6 @@ namespace HustleHub.BusinessArea.Repository
 
             return students;
         }
-
-
         public async Task<Student?> GetStudentByEmailAsync(string email)
         {
             return await _dbcontext.Students.FirstOrDefaultAsync(s => s.Email == email);
@@ -130,32 +128,31 @@ namespace HustleHub.BusinessArea.Repository
 
         //Project Requirement
 
-        public async Task<APIResponse> SubmitProjectRequestAsync(Projects model, IFormFile? projectDocFile)
+        public async Task<APIResponse> SubmitProjectRequestAsync(RequiredProjectDTO model, IFormFile? projectDocFile)
         {
             try
             {
-                if (model.Email == null)
+                if (string.IsNullOrEmpty(model.Email))
                 {
                     return new APIResponse { Code = 400, Message = "Email cannot be null", Status = "error" };
                 }
 
                 if (projectDocFile != null && projectDocFile.Length > 0)
                 {
-                    // Create the full path uploads/ProjectDocs
                     var uploadsFolder = Path.Combine(_environment.WebRootPath ?? Directory.GetCurrentDirectory(), "uploads", "ProjectDocs");
-                    Directory.CreateDirectory(uploadsFolder); // Ensure folder exists
+                    Directory.CreateDirectory(uploadsFolder);
 
-                    // Save the file
-                    var filePath = Path.Combine(uploadsFolder, projectDocFile.FileName);
+                    var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(projectDocFile.FileName);
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
                     using var stream = new FileStream(filePath, FileMode.Create);
                     await projectDocFile.CopyToAsync(stream);
 
-                    // Store file name in DB (or relative path if needed)
-                    model.ProjectDocsFile = Path.Combine("uploads", "ProjectDocs", projectDocFile.FileName);
+                    model.ProjectDocsFile = Path.Combine("uploads", "ProjectDocs", uniqueFileName);
                 }
 
-                ProjectRequest project = new ProjectRequest
-                { 
+                var project = new ProjectRequest
+                {
                     Email = model.Email,
                     ProjectType = model.ProjectType,
                     ComplexityLevel = model.ComplexityLevel,
@@ -166,7 +163,7 @@ namespace HustleHub.BusinessArea.Repository
                     Tcstatus = model.Tcstatus,
                     ApprovedBy = model.ApprovedBy,
                     ApprovedDate = model.ApprovedDate,
-                    UpdateDate = DateTime.UtcNow,
+                    UpdateDate = DateTime.UtcNow
                 };
 
                 _dbcontext.ProjectRequests.Add(project);
@@ -179,9 +176,7 @@ namespace HustleHub.BusinessArea.Repository
                 return new APIResponse { Code = 500, Message = "Error: " + ex.Message, Status = "error" };
             }
         }
-
-
-
+        
         public async Task<IEnumerable<ProjectRequest>> GetAllProjectsAsync()
         {
             var projects = await _dbcontext.ProjectRequests
@@ -208,7 +203,6 @@ namespace HustleHub.BusinessArea.Repository
 
             return projects;
         }
-
         public async Task<ProjectRequest?> GetProjectByIdAsync(int id) // Updated return type to allow nullability
         {
             var project = await _dbcontext.ProjectRequests
@@ -322,9 +316,6 @@ namespace HustleHub.BusinessArea.Repository
                 }
             });
         }
-
-
-
         public async Task<IEnumerable<AdminProjectDTO>> GetAllAdminProjectsAsync()
         {
             var projects = await _dbcontext.AdminProjects
@@ -372,9 +363,6 @@ namespace HustleHub.BusinessArea.Repository
 
             return response;
         }
-
-
-
         public async Task<AdminProjectDTO?> GetAdminProjectByIdAsync(int id)
         {
             var project = await _dbcontext.AdminProjects.FirstOrDefaultAsync(p => p.ProjectId == id);

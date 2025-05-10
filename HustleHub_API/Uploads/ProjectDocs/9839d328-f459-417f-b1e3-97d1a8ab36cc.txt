@@ -1,0 +1,41 @@
+Scaffold-DbContext 'Server= MANOHARES-5279\SQLEXPRESS;Initial Catalog=Trust;User ID=sa;Password=sa@123;TrustServerCertificate=true;' Microsoft.EntityFrameworkCore.SqlServer -OutputDir DBContext/Entities/TableEntities -ContextDir Data -Context ApplicationDbContext -dataannotations –Force
+
+
+public class EmployeeTestEntities : ApplicationDbContext
+ {
+     public EmployeeTestEntities()
+     {
+
+     }
+     public EmployeeTestEntities(DbContextOptions<ApplicationDbContext> options)
+         : base(options)
+     {
+
+     }
+
+ }
+
+Scaffold-DbContext 'Server= MANOHARES-5279\SQLEXPRESS;Initial Catalog=Trust;Persist Security Info=False;TrustServerCertificate=true;' Microsoft.EntityFrameworkCore.SqlServer -OutputDir DBContext/Entities/TableEntities -ContextDir Data -Context ApplicationDbContext -dataannotations –Force
+
+
+
+Scaffold-DbContext 'Server=MANOHARES-5279\SQLEXPRESS;Initial Catalog=Trust;TrustServerCertificate=true' Microsoft.EntityFrameworkCore.SqlServer - OutputDir DbContext/Entities/TableEntities -ContextDir Data -Context ApplicationDbContext -dataannotations -Force  
+
+
+Final 
+
+Scaffold-DbContext 'Server=MANOHARES-5279\SQLEXPRESS;Initial Catalog=HustelHubDB;Trusted_Connection=True;TrustServerCertificate=True' Microsoft.EntityFrameworkCore.SqlServer -OutputDir DBContext/Entities/TableEntities -ContextDir Data -Context ApplicationDbContext -dataannotations –Force
+
+
+Scaffold-DbContext 'Server=hustlehub.cfw6scimuwug.ap-south-1.rds.amazonaws.com,1433;Database=hustlehubdb;User Id=hustlehub;Password=Manohares;TrustServerCertificate=True' Microsoft.EntityFrameworkCore.SqlServer -OutputDir DBContext/Entities/TableEntities -ContextDir Data -Context ApplicationDbContext -dataannotations –Force
+
+
+scp -i "F:\HustleHub_Deployment\hustlehub_api_key.pem" -r "F:\HustleHub_API\HustleHub_API\publish" ec2-user@<13.232.203.38>:/home/ec2-user/
+
+
+
+
+
+
+
+

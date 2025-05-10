@@ -27,7 +27,6 @@ namespace HustleHub_API.Controllers
         }
 
         // GET: api/Student
-        // GET: api/Student
         [HttpGet]
         [EnableCors("MyCorsPolicy")]
         public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
@@ -51,14 +50,13 @@ namespace HustleHub_API.Controllers
             return Ok(student);
         }
 
-        // POST: api/Student/Register
-        [HttpPost("Register")]
         [EnableCors("MyCorsPolicy")]
-        public async Task<ActionResult<APIResponse>> RegisterStudent([FromForm] Students model, IFormFile? profilePicFile)
+        // POST: api/Student/Register
+        [HttpPost("RegisterStudent")]
+        public async Task<IActionResult> RegisterStudent([FromForm] StudentDTO model, IFormFile? profilePicFile)
         {
             var result = await _repository.RegisterStudentAsync(model, profilePicFile);
             return StatusCode(result.Code, result);
         }
-
     }
 }
