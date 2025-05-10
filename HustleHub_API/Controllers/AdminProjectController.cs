@@ -1,6 +1,7 @@
 ﻿using HustleHub.BusinessArea.Interface;
 using HustleHub.BusinessArea.Repository;
 using HustleHub_API.BusinessLogic.Models;
+using HustleHub_API.BusinessLogic.Models.BusinessModels;
 using HustleHub_API.DBContext.Entities.TableEntities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -56,6 +57,21 @@ namespace HustleHub_API.Controllers
             var result = await objRep.DeleteAdminProjectAsync(id);
             return StatusCode(result.Code, result);
         }
+
+        [HttpPost("AddCategory")]
+        public async Task<IActionResult> AddCategory([FromBody] CategoryDTO model)
+        {
+            var result = await objRep.AddCategoryAsync(model);
+            return StatusCode(result.Code, result);
+        }
+
+        [HttpGet("GetAllCategories")]
+        public async Task<IActionResult> GetAllCategories()
+        {
+            var categories = await objRep.GetAllCategoriesAsync();
+            return Ok(categories);
+        }
+
 
     }
 }

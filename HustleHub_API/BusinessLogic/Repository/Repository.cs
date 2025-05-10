@@ -180,8 +180,7 @@ namespace HustleHub.BusinessArea.Repository
             {
                 return new APIResponse { Code = 500, Message = "Error: " + ex.Message, Status = "error" };
             }
-        }
-        
+        }       
         public async Task<IEnumerable<ProjectRequest>> GetAllProjectsAsync()
         {
             var projects = await _dbcontext.ProjectRequests
@@ -463,6 +462,64 @@ namespace HustleHub.BusinessArea.Repository
                     Message = $"Error: {ex.Message}"
                 };
             }
+        }
+
+
+        public async Task<APIResponse> AddCategoryAsync(CategoryDTO model)
+        {
+            try
+            {
+                // Check if the category already exists
+                var existingCategory = await _dbcontext.Categories
+                    .FirstOrDefaultAsync(c => c.CategoryName == model.CategoryName);
+
+                if (existingCategory != null)
+                {
+                    return new APIResponse
+                    {
+                        Code = 400,
+                        Status = "error",
+                        Message = "Category already exists."
+                    };
+                }
+
+                // Add the new category
+                var category = new Category
+                {
+                    CategoryName = model.CategoryName,
+                };
+
+                _dbcontext.Categories.Add(category);
+                await _dbcontext.SaveChangesAsync();
+
+                return new APIResponse
+                {
+                    Code = 200,
+                    Status = "success",
+                    Message = "Category added successfully."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new APIResponse
+                {
+                    Code = 500,
+                    Status = "error",
+                    Message = $"Error: {ex.Message}"
+                };
+            }
+        }
+        public async Task<IEnumerable<CategoryDTO>> GetAllCategoriesAsync()
+        {
+            var categories = await _dbcontext.Categories
+                .OrderBy(c => c.CategoryName)
+                .ToListAsync();
+
+            return categories.Select(c => new CategoryDTO
+            {
+                CategoryId = c.CategoryId,
+                CategoryName = c.CategoryName
+            });
         }
 
 
