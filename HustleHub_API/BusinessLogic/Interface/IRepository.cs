@@ -17,6 +17,10 @@ namespace HustleHub.BusinessArea.Interface
         Task<APIResponse> RegisterStudentAsync(StudentDTO model, IFormFile? profilePicFile);
         Task<List<Student>> GetAllStudentsAsync();
         Task<Student?> GetStudentByEmailAsync(string email);
+        Task<Student?> GetStudentByIdAsync(int id);
+        Task<APIResponse> DeleteStudentAsync(int id);
+
+
 
         //Project Requirement   
         Task<APIResponse> SubmitProjectRequestAsync(RequiredProjectDTO model, IFormFile? projectDocFile);

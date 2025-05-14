@@ -67,5 +67,28 @@ namespace HustleHub_API.Controllers
             return StatusCode(result.Code, result);
         }
 
+        [HttpGet("GetById/{id}")]
+        [EnableCors("MyCorsPolicy")]
+        public async Task<IActionResult> GetStudentById(int id)
+        {
+            var student = await _repository.GetStudentByIdAsync(id);
+
+            if (student == null)
+            {
+                return NotFound(new { Message = "Student not found." });
+            }
+
+            return Ok(student);
+        }
+
+        [HttpDelete("Delete/{id}")]
+        [EnableCors("MyCorsPolicy")]
+        public async Task<IActionResult> DeleteStudent(int id)
+        {
+            var result = await _repository.DeleteStudentAsync(id);
+            return StatusCode(result.Code, result);
+        }
+
+
     }
 }

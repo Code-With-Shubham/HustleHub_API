@@ -68,6 +68,61 @@ namespace HustleHub.BusinessArea.Repository
             }
         }
 
+        public async Task<Student?> GetStudentByIdAsync(int id)
+        {
+            try
+            {
+                // Fetch the student by ID
+                var student = await _dbcontext.Students.FirstOrDefaultAsync(s => s.Id == id);
+                return student;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching student by ID: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task<APIResponse> DeleteStudentAsync(int id)
+        {
+            try
+            {
+                // Find the student by ID
+                var student = await _dbcontext.Students.FirstOrDefaultAsync(s => s.Id == id);
+
+                if (student == null)
+                {
+                    return new APIResponse
+                    {
+                        Code = 404,
+                        Status = "error",
+                        Message = "Student not found."
+                    };
+                }
+
+                // Remove the student
+                _dbcontext.Students.Remove(student);
+                await _dbcontext.SaveChangesAsync();
+
+                return new APIResponse
+                {
+                    Code = 200,
+                    Status = "success",
+                    Message = "Student deleted successfully."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new APIResponse
+                {
+                    Code = 500,
+                    Status = "error",
+                    Message = $"Error: {ex.Message}"
+                };
+            }
+        }
+
+
         public async Task<APIResponse> RegisterStudentAsync(StudentDTO model, IFormFile? profilePicFile)
         {
             APIResponse result = new APIResponse();
