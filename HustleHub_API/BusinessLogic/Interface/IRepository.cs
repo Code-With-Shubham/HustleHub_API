@@ -1,5 +1,6 @@
 ﻿using HustleHub.BusinessArea.Models.APIResponse;
 using HustleHub_API.BusinessLogic.Models;
+using HustleHub_API.BusinessLogic.Models.APIResponse;
 using HustleHub_API.BusinessLogic.Models.BusinessModels;
 using HustleHub_API.DBContext.Entities.TableEntities;
 using System;
@@ -13,12 +14,15 @@ namespace HustleHub.BusinessArea.Interface
     public interface IRepository
     {
         //Student Registration
-        Task<APIResponse> StudentLoginAsync(StudentLoginDTO model);
+        Task<LoginResponse> StudentLoginAsync(StudentLoginDTO model);
         Task<APIResponse> RegisterStudentAsync(StudentDTO model, IFormFile? profilePicFile);
         Task<List<Student>> GetAllStudentsAsync();
         Task<Student?> GetStudentByEmailAsync(string email);
         Task<Student?> GetStudentByIdAsync(int id);
         Task<APIResponse> DeleteStudentAsync(int id);
+        Task<StudProjAPIResponse> ProjectRequestByIDAsync(int id);
+
+
 
 
 

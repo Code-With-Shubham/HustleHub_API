@@ -1,6 +1,7 @@
 ﻿using HustleHub.BusinessArea.Interface;
 using HustleHub.BusinessArea.Models.APIResponse;
 using HustleHub_API.BusinessLogic.Models;
+using HustleHub_API.BusinessLogic.Models.APIResponse;
 using HustleHub_API.BusinessLogic.Models.BusinessModels;
 using HustleHub_API.Data;
 using HustleHub_API.DBContext.Entities.TableEntities;
@@ -27,46 +28,44 @@ namespace HustleHub.BusinessArea.Repository
             _environment = environment;
         }
 
-        public async Task<APIResponse> StudentLoginAsync(StudentLoginDTO model)
+        public async Task<LoginResponse> StudentLoginAsync(StudentLoginDTO model)
         {
             try
             {
-                // Check if the student exists in the database
                 var student = await _dbcontext.Students
                     .FirstOrDefaultAsync(s => s.Email == model.Email && s.Password == model.Password);
 
                 if (student == null)
                 {
-                    return new APIResponse
+                    return new LoginResponse
                     {
                         Code = 401,
                         Status = "error",
-                        Message = "Invalid email or password."
+                        Message = "Invalid email or password.",
+                        Data = null
                     };
                 }
 
-                // Update the last login time
-                //student.LastLoginAt = DateTime.UtcNow;
-                //_dbcontext.Students.Update(student);
-                //await _dbcontext.SaveChangesAsync();
-
-                return new APIResponse
+                return new LoginResponse
                 {
                     Code = 200,
                     Status = "success",
-                    Message = "Login successful."
+                    Message = "Login successful.",
+                    Data = student // ✅ Important: return student object
                 };
             }
             catch (Exception ex)
             {
-                return new APIResponse
+                return new LoginResponse
                 {
                     Code = 500,
                     Status = "error",
-                    Message = $"Error: {ex.Message}"
+                    Message = $"Error: {ex.Message}",
+                    Data = null
                 };
             }
         }
+
 
         public async Task<Student?> GetStudentByIdAsync(int id)
         {
@@ -90,6 +89,7 @@ namespace HustleHub.BusinessArea.Repository
                 // Find the student by ID
                 var student = await _dbcontext.Students.FirstOrDefaultAsync(s => s.Id == id);
 
+
                 if (student == null)
                 {
                     return new APIResponse
@@ -100,9 +100,18 @@ namespace HustleHub.BusinessArea.Repository
                     };
                 }
 
+                var pr = await _dbcontext.ProjectRequests.FirstOrDefaultAsync(x => x.Email == student.Email);
+
+                if (student.Email == pr.Email)
+                {
+                    _dbcontext.ProjectRequests.Remove(pr);
+                    await _dbcontext.SaveChangesAsync();
+                }
+
                 // Remove the student
                 _dbcontext.Students.Remove(student);
                 await _dbcontext.SaveChangesAsync();
+
 
                 return new APIResponse
                 {
@@ -324,6 +333,98 @@ namespace HustleHub.BusinessArea.Repository
 
             return project; // No CS8603 warning since the method now explicitly allows null return
         }
+
+
+        public async Task<StudProjAPIResponse> ProjectRequestByIDAsync(int id)
+        {
+            try
+            {
+                var student = await _dbcontext.Students
+                    .Where(s => s.Id == id)
+                    .Select(s => new StudentDTO
+                    {
+                        Id = s.Id,
+                        Name = s.Name,
+                        Email = s.Email
+                    }).FirstOrDefaultAsync();
+
+                if (student == null)
+                {
+                    return new StudProjAPIResponse
+                    {
+                        Code = 404,
+                        Status = "error",
+                        Message = "Student not found.",
+                        Data = null
+                    };
+                }
+
+                var projects = await _dbcontext.ProjectRequests
+                    .Where(p => p.Email == student.Email)
+                    .Select(p => new RequiredProjectDTO
+                    {
+                        Id = p.Rpid,
+                        Email = p.Email,
+                        ProjectType = p.ProjectType,
+                        ComplexityLevel = p.ComplexityLevel,
+                        Description = p.Description,
+                        ProjectDocsFile = p.ProjectDocs,
+                        Mobile = p.Mobile,
+                        // Fix for CS0266 and CS8629: Explicitly cast nullable decimal to decimal and handle potential null values
+                        Budget = p.Budget ?? 0m,
+                        ApprovedBy = p.ApprovedBy,
+                        ApprovedDate = p.ApprovedDate,
+                        // Fix for CS0266 and CS8629: Explicitly cast nullable DateTime to DateTime and handle potential null values
+                        UpdateAt = p.UpdateDate ?? DateTime.MinValue,
+                        UpdateCount = p.UpdateCount
+
+
+                        // Will update below
+                    }).ToListAsync();
+
+                // Convert project docs to Base64
+                foreach (var project in projects)
+                {
+                    if (!string.IsNullOrEmpty(project.ProjectDocsFile))
+                    {
+                        var docPath = Path.Combine(_environment.ContentRootPath, "Uploads", "ProjectDocs", project.ProjectDocsFile);
+                        if (File.Exists(docPath))
+                        {
+                            var bytes = await File.ReadAllBytesAsync(docPath);
+                            project.ProjectDocsFile = Convert.ToBase64String(bytes);
+                        }
+                        else
+                        {
+                            project.ProjectDocsFile = null;
+                        }
+                    }
+                }
+
+                return new StudProjAPIResponse
+                {
+                    Code = 200,
+                    Status = "success",
+                    Message = "Project requests retrieved successfully.",
+                    Data = new StudentProjectResponseDTO
+                    {
+                        Student = student,
+                        ProjectRequests = projects
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                return new StudProjAPIResponse
+                {
+                    Code = 500,
+                    Status = "error",
+                    Message = $"Internal Server Error: {ex.Message}",
+                    Data = null
+                };
+            }
+        }
+
+
 
 
 

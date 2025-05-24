@@ -3,9 +3,13 @@ using HustleHub.BusinessArea.Repository;
 using HustleHub_API.BusinessLogic.Models;
 using HustleHub_API.BusinessLogic.Models.BusinessModels;
 using HustleHub_API.DBContext.Entities.TableEntities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using static HustleHub.BusinessArea.Interface.IRepository;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace HustleHub_API.Controllers
 {
@@ -13,10 +17,9 @@ namespace HustleHub_API.Controllers
     [ApiController]
     public class AdminProjectController : ControllerBase
     {
-        private readonly HustleHub.BusinessArea.Interface.IRepository objRep;
+        private readonly IRepository objRep;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AdminProjectController> _logger;
-
 
         public AdminProjectController(IRepository repository, IConfiguration configuration, ILogger<AdminProjectController> logger)
         {
@@ -71,17 +74,6 @@ namespace HustleHub_API.Controllers
             var categories = await objRep.GetAllCategoriesAsync();
             return Ok(categories);
         }
-
-        [HttpPost("Login")]
-        public async Task<IActionResult> AdminLogin([FromBody] AdminLoginDTO model)
-        {
-            var result = await objRep.AdminLoginAsync(model);
-            return StatusCode(result.Code, result);
-        }
-
-
-
-
 
     }
 }

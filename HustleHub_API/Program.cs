@@ -1,10 +1,12 @@
 using HustleHub.BusinessArea.Interface;
 using HustleHub.BusinessArea.Repository;
 using HustleHub_API.Data;
-using HustleHub_API.Middleware;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,37 +33,53 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Dependency Injection for your Repository
 builder.Services.AddTransient<IRepository, Repository>();
 
+// JWT Authentication
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
+    });
+
 // Swagger Configuration
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "HustleHub", Version = "v1" });
 
-    c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "ApiKey must appear in header",
-        Type = SecuritySchemeType.ApiKey,
-        Name = "XApiKey",
+        Description = "JWT Authorization header using the Bearer scheme. Example: 'Authorization: Bearer {token}'",
+        Name = "Authorization",
         In = ParameterLocation.Header,
-        Scheme = "ApiKeyScheme"
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
     });
 
-    var key = new OpenApiSecurityScheme
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-        Reference = new OpenApiReference
         {
-            Type = ReferenceType.SecurityScheme,
-            Id = "ApiKey"
-        },
-        In = ParameterLocation.Header
-    };
-
-    var requirement = new OpenApiSecurityRequirement
-    {
-        { key, new List<string>() }
-    };
-
-    c.AddSecurityRequirement(requirement);
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 });
 
 // CORS Policy
@@ -105,12 +123,8 @@ app.UseStaticFiles(new StaticFileOptions
 // CORS
 app.UseCors("MyCorsPolicy");
 
-// Custom Middleware for API Key
-app.UseMiddleware<ApiKeyMiddleware>();
-
-// Uncomment this if deploying somewhere HTTPS is fully supported
-// app.UseHttpsRedirection();
-
+// Enable Authentication & Authorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
