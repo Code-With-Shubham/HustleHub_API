@@ -766,7 +766,7 @@ namespace HustleHub.BusinessArea.Repository
             }
         }
 
-        public async Task<IEnumerable<PurchaseRequest>> GetPurchesRequestsAsync()
+        public async Task<IEnumerable<PurchaseRequest>> GetPurchaseRequestsAsync()
         {
             var projects = await _dbcontext.PurchaseRequests
                                            .OrderByDescending(p => p.RequestDate)
