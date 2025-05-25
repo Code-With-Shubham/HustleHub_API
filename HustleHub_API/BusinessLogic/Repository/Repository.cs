@@ -407,30 +407,16 @@ namespace HustleHub.BusinessArea.Repository
                     {
                         try
                         {
-                            // Handle optional base64 prefix
-                            var base64Data = model.Image;
-                            if (base64Data.Contains(","))
-                                base64Data = base64Data.Substring(base64Data.IndexOf(",") + 1);
-
-                            projectIconBytes = Convert.FromBase64String(base64Data);
-
-                            if (projectIconBytes.Length > 2 * 1024 * 1024)
-                            {
-                                return new APIResponse
-                                {
-                                    Code = 400,
-                                    Message = "Project icon image must be less than 2MB.",
-                                    Status = "error"
-                                };
-                            }
+                            byte[] imageBytes = Convert.FromBase64String(model.Image);
+                            projectIconBytes = imageBytes; // ✅ FIXED HERE
                         }
-                        catch (FormatException)
+                        catch
                         {
                             return new APIResponse
                             {
                                 Code = 400,
-                                Message = "Invalid Base64 format for project icon image.",
-                                Status = "error"
+                                Status = "error",
+                                Message = "Invalid Base64 format for project icon image."
                             };
                         }
                     }
@@ -491,7 +477,6 @@ namespace HustleHub.BusinessArea.Repository
                 }
             });
         }
-
         public async Task<IEnumerable<AdminProjectDTO>> GetAllAdminProjectsAsync()
         {
             var projects = await _dbcontext.AdminProjects
