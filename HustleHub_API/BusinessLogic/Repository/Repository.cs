@@ -401,25 +401,29 @@ namespace HustleHub.BusinessArea.Repository
 
                 try
                 {
-
-
                     byte[]? projectIconBytes = null;
 
-                    if (model.Image != null && model.Image.Length > 0)
+                    if (!string.IsNullOrEmpty(model.Image))
                     {
-                        if (model.Image.Length > 2 * 1024 * 1024)
+                        try
+                        {
+                            // Remove MIME prefix if present
+                            var base64Data = model.Image.Contains(",")
+                                ? model.Image.Substring(model.Image.IndexOf(",") + 1)
+                                : model.Image;
+
+                            projectIconBytes = Convert.FromBase64String(base64Data);
+                        }
+                        catch (FormatException)
                         {
                             return new APIResponse
                             {
                                 Code = 400,
                                 Status = "error",
-                                Message = "Profile picture size must be less than 2MB."
+                                Message = "Invalid Base64 format for project icon image. Make sure it's a valid Base64 string."
                             };
                         }
-
-                        projectIconBytes = model.Image;
                     }
-
 
                     model.CreatedAt = DateTime.UtcNow;
                     model.UpdatedAt = null;
@@ -477,6 +481,7 @@ namespace HustleHub.BusinessArea.Repository
                 }
             });
         }
+
         public async Task<IEnumerable<AdminProjectDTO>> GetAllAdminProjectsAsync()
         {
             var projects = await _dbcontext.AdminProjects
@@ -487,22 +492,19 @@ namespace HustleHub.BusinessArea.Repository
 
             foreach (var project in projects)
             {
-                byte[]? imageBytes = project.Image;
-
-                // Convert byte[] image to base64 string
                 string? imageBase64 = null;
-                if (imageBytes != null && imageBytes.Length > 0)
+
+                if (project.Image != null && project.Image.Length > 0)
                 {
-                    imageBase64 = Convert.ToBase64String(imageBytes);
+                    // Optional: Add data URI prefix
+                    imageBase64 = "data:image/png;base64," + Convert.ToBase64String(project.Image);
                 }
 
-                // Get associated skills for this project
                 var skills = await _dbcontext.ProjectSkills
                     .Where(s => s.ProjectId == project.ProjectId)
                     .Select(s => s.SkillName)
                     .ToListAsync();
 
-                // Add to DTO response list
                 response.Add(new AdminProjectDTO
                 {
                     ProjectId = project.ProjectId,
@@ -516,13 +518,16 @@ namespace HustleHub.BusinessArea.Repository
                     BasePrice = project.BasePrice,
                     PremiumPrice = project.PremiumPrice,
                     CreatedAt = project.CreatedAt,
-                    Image = imageBytes, // Correctly assign byte[] to Image property
+                    UpdatedAt = project.UpdatedAt,
+                    DisplayStatus = project.DisplayStatus,
+                    Image = imageBase64,
                     Skills = skills
                 });
             }
 
             return response;
         }
+
 
         public async Task<AdminProjectDTO?> GetAdminProjectByIdAsync(int id)
         {
@@ -531,7 +536,11 @@ namespace HustleHub.BusinessArea.Repository
             if (project == null)
                 return null;
 
-            byte[]? imageBytes = project.Image; // Correctly use byte[] type for the Image property
+            string? imageBase64 = null;
+            if (project.Image != null && project.Image.Length > 0)
+            {
+                imageBase64 = "data:image/png;base64," + Convert.ToBase64String(project.Image);
+            }
 
             var skills = await _dbcontext.ProjectSkills
                 .Where(s => s.ProjectId == project.ProjectId)
@@ -551,10 +560,13 @@ namespace HustleHub.BusinessArea.Repository
                 BasePrice = project.BasePrice,
                 PremiumPrice = project.PremiumPrice,
                 CreatedAt = project.CreatedAt,
-                Image = imageBytes, // Correctly assign byte[] to Image property
+                UpdatedAt = project.UpdatedAt,
+                DisplayStatus = project.DisplayStatus,
+                Image = imageBase64,
                 Skills = skills
             };
         }
+
 
         public async Task<APIResponse> DeleteAdminProjectAsync(int projectId)
         {
