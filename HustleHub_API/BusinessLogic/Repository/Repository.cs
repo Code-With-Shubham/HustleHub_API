@@ -779,12 +779,32 @@ namespace HustleHub.BusinessArea.Repository
             }
         }
 
-        public async Task<IEnumerable<PurchaseRequest>> GetPurchaseRequestsAsync()
+        public async Task<IEnumerable<PurchaseRequestWithStudentDto>> GetPurchaseRequestsAsync()
         {
-            var projects = await _dbcontext.PurchaseRequests
-                                           .OrderByDescending(p => p.PurchaseDate)
-                                           .ToListAsync();
-            return projects;
+            var requests = await _dbcontext.PurchaseRequests
+        .Join(
+            _dbcontext.Students,
+            pr => pr.Email,
+            s => s.Email,
+            (pr, s) => new PurchaseRequestWithStudentDto
+            {
+                PurchaseId = pr.PurchaseId,
+                Email = pr.Email,
+                ProjectId = pr.ProjectId,
+                PurchaseDate = pr.PurchaseDate,
+                IsPremium = pr.IsPremium,
+                IsStatus = pr.IsStatus,
+                StudentId = s.Id,
+                Name = s.Name,
+                Mobile = s.Mobile,
+               
+            }
+        )
+        .OrderByDescending(x => x.PurchaseDate)
+        .ToListAsync();
+            return requests;
+
+
         }
 
         public async Task<APIResponse> UpdatePurchaseRequestStatusAsync(int purchaseId, string isStatus)

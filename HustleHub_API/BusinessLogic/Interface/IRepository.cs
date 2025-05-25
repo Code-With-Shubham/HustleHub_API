@@ -43,8 +43,9 @@ namespace HustleHub.BusinessArea.Interface
 
         //Purchase Requests
         Task<APIResponse> PurchaseRequestAsync(PurchaseRequestDto model);
-        Task<IEnumerable<PurchaseRequest>> GetPurchaseRequestsAsync();
+        Task<IEnumerable<PurchaseRequestWithStudentDto>> GetPurchaseRequestsAsync();
         Task<APIResponse> UpdatePurchaseRequestStatusAsync(int purchaseId, string isStatus);
         Task<APIResponse> SoftDeletePurchaseRequestAsync(int purchaseId);
+
     }
 }
