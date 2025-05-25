@@ -32,7 +32,7 @@ namespace HustleHub.BusinessArea.Interface
         Task<ProjectRequest?> GetProjectByIdAsync(int id);
 
         //Admin Project
-        Task<APIResponse> AddAdminProjectAsync(AdminProjectDTO model, IFormFile? ProjectIconImage);
+        Task<APIResponse> AddAdminProjectAsync(AdminProjectDTO model);
         Task<IEnumerable<AdminProjectDTO>> GetAllAdminProjectsAsync();
         Task<AdminProjectDTO?> GetAdminProjectByIdAsync(int id);
         Task<APIResponse> DeleteAdminProjectAsync(int projectId);

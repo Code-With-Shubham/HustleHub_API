@@ -24,7 +24,7 @@ public partial class AdminProject
 
     public string? Description2 { get; set; }
 
-    public string? Image { get; set; }
+    public byte[]? Image { get; set; }
 
     [Column("CategoryID")]
     [StringLength(100)]

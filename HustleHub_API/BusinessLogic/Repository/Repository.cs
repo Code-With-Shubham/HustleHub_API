@@ -391,7 +391,7 @@ namespace HustleHub.BusinessArea.Repository
 
 
         //Admin Project
-        public async Task<APIResponse> AddAdminProjectAsync(AdminProjectDTO model, IFormFile? ProjectIconImage)
+        public async Task<APIResponse> AddAdminProjectAsync(AdminProjectDTO model)
         {
             var strategy = _dbcontext.Database.CreateExecutionStrategy();
 
@@ -401,22 +401,37 @@ namespace HustleHub.BusinessArea.Repository
 
                 try
                 {
-                    string? ProjectIcon = null;
+                    byte[]? projectIconBytes = null;
 
-                    // Upload Project Icon before starting DB operations
-                    if (ProjectIconImage != null && ProjectIconImage.Length > 0)
+                    if (!string.IsNullOrEmpty(model.Image))
                     {
-                        var uploadsFolder = Path.Combine(_environment.ContentRootPath, "Uploads", "ProjectIcons");
-
-                        if (!Directory.Exists(uploadsFolder))
-                            Directory.CreateDirectory(uploadsFolder);
-
-                        ProjectIcon = model.ProjectName + Guid.NewGuid().ToString() + Path.GetExtension(ProjectIconImage.FileName);
-                        var filePath = Path.Combine(uploadsFolder, ProjectIcon);
-
-                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        try
                         {
-                            await ProjectIconImage.CopyToAsync(stream);
+                            // Handle optional base64 prefix
+                            var base64Data = model.Image;
+                            if (base64Data.Contains(","))
+                                base64Data = base64Data.Substring(base64Data.IndexOf(",") + 1);
+
+                            projectIconBytes = Convert.FromBase64String(base64Data);
+
+                            if (projectIconBytes.Length > 2 * 1024 * 1024)
+                            {
+                                return new APIResponse
+                                {
+                                    Code = 400,
+                                    Message = "Project icon image must be less than 2MB.",
+                                    Status = "error"
+                                };
+                            }
+                        }
+                        catch (FormatException)
+                        {
+                            return new APIResponse
+                            {
+                                Code = 400,
+                                Message = "Invalid Base64 format for project icon image.",
+                                Status = "error"
+                            };
                         }
                     }
 
@@ -431,7 +446,7 @@ namespace HustleHub.BusinessArea.Repository
                         Description1 = model.Description1,
                         LongDescription = model.LongDescription,
                         Description2 = model.Description2,
-                        Image = ProjectIcon,
+                        Image = projectIconBytes,
                         CategoryId = model.Category,
                         BasePrice = model.BasePrice,
                         PremiumPrice = model.PremiumPrice,
@@ -476,6 +491,7 @@ namespace HustleHub.BusinessArea.Repository
                 }
             });
         }
+
         public async Task<IEnumerable<AdminProjectDTO>> GetAllAdminProjectsAsync()
         {
             var projects = await _dbcontext.AdminProjects
@@ -487,22 +503,20 @@ namespace HustleHub.BusinessArea.Repository
             foreach (var project in projects)
             {
                 string? imageBase64 = null;
-                if (!string.IsNullOrEmpty(project.Image))
+
+                // Convert byte[] image to base64 string
+                if (project.Image != null && project.Image.Length > 0)
                 {
-                    var filePath = Path.Combine(_environment.ContentRootPath, "Uploads", "projectIcons", project.Image);
-                    if (File.Exists(filePath))
-                    {
-                        var bytes = await File.ReadAllBytesAsync(filePath);
-                        imageBase64 = Convert.ToBase64String(bytes);
-                    }
+                    imageBase64 = Convert.ToBase64String(project.Image);
                 }
 
-                // Get skills
+                // Get associated skills for this project
                 var skills = await _dbcontext.ProjectSkills
                     .Where(s => s.ProjectId == project.ProjectId)
                     .Select(s => s.SkillName)
                     .ToListAsync();
 
+                // Add to DTO response list
                 response.Add(new AdminProjectDTO
                 {
                     ProjectId = project.ProjectId,
@@ -516,13 +530,14 @@ namespace HustleHub.BusinessArea.Repository
                     BasePrice = project.BasePrice,
                     PremiumPrice = project.PremiumPrice,
                     CreatedAt = project.CreatedAt,
-                    Image = imageBase64,
+                    Image = imageBase64, // base64 encoded image string
                     Skills = skills
                 });
             }
 
             return response;
         }
+
         public async Task<AdminProjectDTO?> GetAdminProjectByIdAsync(int id)
         {
             var project = await _dbcontext.AdminProjects.FirstOrDefaultAsync(p => p.ProjectId == id);
@@ -531,14 +546,9 @@ namespace HustleHub.BusinessArea.Repository
                 return null;
 
             string? imageBase64 = null;
-            if (!string.IsNullOrEmpty(project.Image))
+            if (project.Image != null && project.Image.Length > 0)
             {
-                var filePath = Path.Combine(_environment.ContentRootPath, "Uploads", "projectIcons", project.Image);
-                if (File.Exists(filePath))
-                {
-                    var bytes = await File.ReadAllBytesAsync(filePath);
-                    imageBase64 = Convert.ToBase64String(bytes);
-                }
+                imageBase64 = Convert.ToBase64String(project.Image);
             }
 
             var skills = await _dbcontext.ProjectSkills
@@ -563,6 +573,7 @@ namespace HustleHub.BusinessArea.Repository
                 Skills = skills
             };
         }
+
         public async Task<APIResponse> DeleteAdminProjectAsync(int projectId)
         {
             try
@@ -588,15 +599,7 @@ namespace HustleHub.BusinessArea.Repository
                     _dbcontext.ProjectSkills.RemoveRange(project.ProjectSkills);
                 }
 
-                // Delete the project icon file if it exists
-                if (!string.IsNullOrEmpty(project.Image))
-                {
-                    var filePath = Path.Combine(_environment.ContentRootPath, "Uploads", "ProjectIcons", project.Image);
-                    if (File.Exists(filePath))
-                    {
-                        File.Delete(filePath);
-                    }
-                }
+                // No need to delete any file, as image is stored in DB as byte[]
 
                 // Delete the AdminProject
                 _dbcontext.AdminProjects.Remove(project);
@@ -619,6 +622,7 @@ namespace HustleHub.BusinessArea.Repository
                 };
             }
         }
+
 
 
         public async Task<APIResponse> AddCategoryAsync(CategoryDTO model)

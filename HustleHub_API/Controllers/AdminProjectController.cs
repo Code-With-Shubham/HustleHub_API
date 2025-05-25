@@ -31,9 +31,9 @@ namespace HustleHub_API.Controllers
         }
 
         [HttpPost("Add")]
-        public async Task<IActionResult> AddAdminProject([FromForm] AdminProjectDTO model, IFormFile? ProjectIconImage)
+        public async Task<IActionResult> AddAdminProject([FromForm] AdminProjectDTO model)
         {
-            var result = await objRep.AddAdminProjectAsync(model, ProjectIconImage);
+            var result = await objRep.AddAdminProjectAsync(model);
             return StatusCode(result.Code, result);
         }
 

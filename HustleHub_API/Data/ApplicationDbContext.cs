@@ -42,12 +42,12 @@ public partial class ApplicationDbContext : DbContext
     {
         modelBuilder.Entity<AdminLogin>(entity =>
         {
-            entity.HasKey(e => e.AdminId).HasName("PK__AdminLog__719FE4E8DAAAAC9D");
+            entity.HasKey(e => e.AdminId).HasName("PK__AdminLog__719FE4E89B8C5C2B");
         });
 
         modelBuilder.Entity<AdminProject>(entity =>
         {
-            entity.HasKey(e => e.ProjectId).HasName("PK__AdminPro__761ABED0B97D2FF5");
+            entity.HasKey(e => e.ProjectId).HasName("PK__AdminPro__761ABED058340FC6");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.DisplayStatus).HasDefaultValue(true);
@@ -55,17 +55,17 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<CareerPath>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__CareerPa__3214EC278EF1C62C");
+            entity.HasKey(e => e.Id).HasName("PK__CareerPa__3214EC2732D47BD5");
         });
 
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => e.CategoryId).HasName("PK__Category__19093A2BFD395456");
+            entity.HasKey(e => e.CategoryId).HasName("PK__Category__19093A2BDCFC11F5");
         });
 
         modelBuilder.Entity<ProjectRequest>(entity =>
         {
-            entity.HasKey(e => e.Rpid).HasName("PK__ProjectR__4484A8331AB66385");
+            entity.HasKey(e => e.Rpid).HasName("PK__ProjectR__4484A8336E300611");
 
             entity.Property(e => e.RequestDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Status).HasDefaultValue(true);
@@ -78,14 +78,14 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<ProjectSkill>(entity =>
         {
-            entity.HasKey(e => e.SkillId).HasName("PK__ProjectS__DFA091E70D06ECCD");
+            entity.HasKey(e => e.SkillId).HasName("PK__ProjectS__DFA091E714523438");
 
             entity.HasOne(d => d.Project).WithMany(p => p.ProjectSkills).HasConstraintName("FK_ProjectSkills_AdminProject");
         });
 
         modelBuilder.Entity<PurchaseRequest>(entity =>
         {
-            entity.HasKey(e => e.PurchaseId).HasName("PK__Purchase__6B0A6BDE39F86197");
+            entity.HasKey(e => e.PurchaseId).HasName("PK__Purchase__6B0A6BDE4405E5A2");
 
             entity.Property(e => e.PurchaseDate).HasDefaultValueSql("(getdate())");
 
@@ -100,7 +100,7 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<Student>(entity =>
         {
-            entity.HasKey(e => e.Email).HasName("PK__Student__A9D10535BB524F8E");
+            entity.HasKey(e => e.Email).HasName("PK__Student__A9D105356A85CD1B");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
@@ -110,7 +110,7 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<StudentInfo>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__StudentI__3214EC276D4A222E");
+            entity.HasKey(e => e.Id).HasName("PK__StudentI__3214EC278F376A17");
 
             entity.HasOne(d => d.EmailNavigation).WithMany(p => p.StudentInfos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
