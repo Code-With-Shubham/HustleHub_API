@@ -401,34 +401,23 @@ namespace HustleHub.BusinessArea.Repository
 
                 try
                 {
+
+
                     byte[]? projectIconBytes = null;
 
-                    if (!string.IsNullOrEmpty(model.Image))
+                    if (model.Image != null && model.Image.Length > 0)
                     {
-                        try
-                        {
-                            // If the image string contains the base64 prefix, remove it
-                            var base64String = model.Image;
-
-                            if (model.Image.Contains(","))
-                            {
-                                base64String = model.Image.Substring(model.Image.IndexOf(",") + 1);
-                            }
-
-                            // Remove whitespace and convert
-                            base64String = base64String.Trim();
-                            byte[] imageBytes = Convert.FromBase64String(base64String);
-                            projectIconBytes = imageBytes;
-                        }
-                        catch
+                        if (model.Image.Length > 2 * 1024 * 1024)
                         {
                             return new APIResponse
                             {
                                 Code = 400,
                                 Status = "error",
-                                Message = "Invalid Base64 format for project icon image."
+                                Message = "Profile picture size must be less than 2MB."
                             };
                         }
+
+                        projectIconBytes = model.Image;
                     }
 
 
@@ -498,12 +487,13 @@ namespace HustleHub.BusinessArea.Repository
 
             foreach (var project in projects)
             {
-                string? imageBase64 = null;
+                byte[]? imageBytes = project.Image;
 
                 // Convert byte[] image to base64 string
-                if (project.Image != null && project.Image.Length > 0)
+                string? imageBase64 = null;
+                if (imageBytes != null && imageBytes.Length > 0)
                 {
-                    imageBase64 = Convert.ToBase64String(project.Image);
+                    imageBase64 = Convert.ToBase64String(imageBytes);
                 }
 
                 // Get associated skills for this project
@@ -526,7 +516,7 @@ namespace HustleHub.BusinessArea.Repository
                     BasePrice = project.BasePrice,
                     PremiumPrice = project.PremiumPrice,
                     CreatedAt = project.CreatedAt,
-                    Image = imageBase64, // base64 encoded image string
+                    Image = imageBytes, // Correctly assign byte[] to Image property
                     Skills = skills
                 });
             }
@@ -541,11 +531,7 @@ namespace HustleHub.BusinessArea.Repository
             if (project == null)
                 return null;
 
-            string? imageBase64 = null;
-            if (project.Image != null && project.Image.Length > 0)
-            {
-                imageBase64 = Convert.ToBase64String(project.Image);
-            }
+            byte[]? imageBytes = project.Image; // Correctly use byte[] type for the Image property
 
             var skills = await _dbcontext.ProjectSkills
                 .Where(s => s.ProjectId == project.ProjectId)
@@ -565,7 +551,7 @@ namespace HustleHub.BusinessArea.Repository
                 BasePrice = project.BasePrice,
                 PremiumPrice = project.PremiumPrice,
                 CreatedAt = project.CreatedAt,
-                Image = imageBase64,
+                Image = imageBytes, // Correctly assign byte[] to Image property
                 Skills = skills
             };
         }

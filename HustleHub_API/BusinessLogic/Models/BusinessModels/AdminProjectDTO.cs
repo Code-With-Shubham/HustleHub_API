@@ -18,7 +18,7 @@ namespace HustleHub_API.BusinessLogic.Models
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public bool? DisplayStatus { get; set; }
-        public string? Image { get; set; }
+        public byte[]? Image { get; set; }
         public List<string>? Skills { get; set; }
     }
 
