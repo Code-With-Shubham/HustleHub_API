@@ -247,7 +247,15 @@ namespace HustleHub.BusinessArea.Repository
                 {
                     try
                     {
-                        projectDocBytes = Convert.FromBase64String(model.ProjectDocsBase64);
+                        // Strip out data URI scheme if present
+                        var base64Data = model.ProjectDocsBase64;
+
+                        if (base64Data.Contains(","))
+                        {
+                            base64Data = base64Data.Substring(base64Data.IndexOf(",") + 1);
+                        }
+
+                        projectDocBytes = Convert.FromBase64String(base64Data);
 
                         if (projectDocBytes.Length > 2 * 1024 * 1024)
                         {
@@ -264,11 +272,12 @@ namespace HustleHub.BusinessArea.Repository
                         return new APIResponse
                         {
                             Code = 400,
-                            Message = "Invalid Base64 format for project document.",
+                            Message = "Invalid Base64 format for project document. Ensure the file is properly encoded.",
                             Status = "error"
                         };
                     }
                 }
+
 
                 var project = new ProjectRequest
                 {
