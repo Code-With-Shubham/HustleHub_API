@@ -2,6 +2,7 @@
 using HustleHub.BusinessArea.Repository;
 using HustleHub_API.BusinessLogic.Models;
 using HustleHub_API.BusinessLogic.Models.BusinessModels;
+using HustleHub_API.BusinessLogic.Models.DTOs;
 using HustleHub_API.DBContext.Entities.TableEntities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -73,6 +74,22 @@ namespace HustleHub_API.Controllers
         {
             var categories = await objRep.GetAllCategoriesAsync();
             return Ok(categories);
+        }
+
+         [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] AdminLoginRequestDto loginDto)
+        {
+            // Map AdminLoginRequestDto to AdminLoginDTO
+            var adminLoginDto = new AdminLoginDTO
+            {
+                Email = loginDto.Email,
+                Password = loginDto.Password
+            };
+
+            var response = await objRep.AdminLoginAsync(adminLoginDto);
+            if (response.Code == 200)
+                return Ok(response);
+            return Unauthorized(response);
         }
 
     }

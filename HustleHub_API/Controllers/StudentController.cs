@@ -143,5 +143,12 @@ namespace HustleHub_API.Controllers
             var result = await _repository.ProjectRequestByIDAsync(id);
             return StatusCode(result.Code, result);
         }
+
+        [HttpGet("purchase-requests/by-student/{studentId}")]
+        public async Task<IActionResult> GetPurchaseRequestsByStudentId(int studentId)
+        {
+            var result = await _repository.GetPurchaseRequestsByStudentIdAsync(studentId);
+            return Ok(result);
+        }
     }
 }

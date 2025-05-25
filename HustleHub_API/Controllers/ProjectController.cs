@@ -2,6 +2,7 @@
 using HustleHub.BusinessArea.Models.APIResponse;
 using HustleHub.BusinessArea.Repository;
 using HustleHub_API.BusinessLogic.Models.BusinessModels;
+using HustleHub_API.BusinessLogic.Models.DTOs;
 using HustleHub_API.DBContext.Entities.TableEntities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -46,6 +47,37 @@ namespace HustleHub_API.Controllers
         {
             var projects = await objRep.GetProjectByIdAsync(id);
             return Ok(projects);
+        }
+
+
+        [Route("PurchesRequest")]
+        [HttpPost]
+        public async Task<IActionResult> PurchesRequest([FromForm] PurchaseRequestDto model)
+        {
+            var result = await objRep.PurchesRequestAsync(model);
+            return StatusCode(result.Code, result);
+        }
+
+        [HttpGet("GetPurchesRequests")]
+        public async Task<IActionResult> GetPurchesRequests()
+        {
+            var projects = await objRep.GetPurchesRequestsAsync();
+            return Ok(projects);
+        }
+
+
+        [HttpPut("UpdatePurchaseRequestStatus")]
+        public async Task<IActionResult> UpdatePurchaseRequestStatus([FromQuery] int purchaseId, [FromQuery] string isStatus)
+        {
+            var result = await objRep.UpdatePurchaseRequestStatusAsync(purchaseId, isStatus);
+            return StatusCode(result.Code, result);
+        }
+
+        [HttpDelete("DeletePurchaseRequest")]
+        public async Task<IActionResult> DeletePurchaseRequest([FromQuery] int purchaseId)
+        {
+            var result = await objRep.SoftDeletePurchaseRequestAsync(purchaseId);
+            return StatusCode(result.Code, result);
         }
 
 

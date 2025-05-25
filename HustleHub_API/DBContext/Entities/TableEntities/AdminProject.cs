@@ -49,5 +49,8 @@ public partial class AdminProject
     public virtual ICollection<ProjectSkill> ProjectSkills { get; set; } = new List<ProjectSkill>();
 
     [InverseProperty("Project")]
+    public virtual ICollection<PurchaseRequest> PurchaseRequests { get; set; } = new List<PurchaseRequest>();
+
+    [InverseProperty("Project")]
     public virtual ICollection<StudentInfo> StudentInfos { get; set; } = new List<StudentInfo>();
 }

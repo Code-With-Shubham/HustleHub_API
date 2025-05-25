@@ -3,6 +3,7 @@ using HustleHub.BusinessArea.Models.APIResponse;
 using HustleHub_API.BusinessLogic.Models;
 using HustleHub_API.BusinessLogic.Models.APIResponse;
 using HustleHub_API.BusinessLogic.Models.BusinessModels;
+using HustleHub_API.BusinessLogic.Models.DTOs;
 using HustleHub_API.Data;
 using HustleHub_API.DBContext.Entities.TableEntities;
 using Microsoft.EntityFrameworkCore;
@@ -755,6 +756,126 @@ namespace HustleHub.BusinessArea.Repository
             }
         }
 
+        public async Task<LoginResponse> AdminLoginAsync(AdminLoginRequestDto loginDto)
+        {
+            var admin = await _dbcontext.AdminLogins
+                .FirstOrDefaultAsync(a => a.Email == loginDto.Email && a.Password == loginDto.Password);
 
+            if (admin == null)
+            {
+                return new LoginResponse
+                {
+                    Code = 401,
+                    Status = "Failed",
+                    Message = "Invalid email or password",
+                    Data = null
+                };
+            }
+
+            return new LoginResponse
+            {
+                Code = 200,
+                Status = "Success",
+                Message = "Login successful",
+                Data = new { admin.AdminId, admin.Email }
+            };
+        }
+
+
+
+        public async Task<APIResponse> PurchesRequestAsync(PurchaseRequestDto model)
+        {
+            try
+            {
+                var mailcheck = await _dbcontext.Students.Where(x => x.Email == model.Email).FirstOrDefaultAsync();
+                if (mailcheck == null)
+                {
+                    return new APIResponse { Code = 400, Message = "This email id not registered", Status = "error" };
+                }
+                if (string.IsNullOrEmpty(model.Email))
+                {
+                    return new APIResponse { Code = 400, Message = "Email cannot be null", Status = "error" };
+                }
+
+                var project = new PurchaseRequest
+                {
+                    ProjectId = model.ProjectId,
+                    Email = model.Email,
+                    RequestDate = DateTime.UtcNow,
+                    IsPremium = model.IsPremium,
+                    IsStatus = "Pending",
+                };
+
+                _dbcontext.PurchaseRequests.Add(project);
+                await _dbcontext.SaveChangesAsync();
+
+                return new APIResponse { Code = 200, Message = "Purches request submitted successfully", Status = "success" };
+            }
+            catch (Exception ex)
+            {
+                return new APIResponse { Code = 500, Message = "Error: " + ex.Message, Status = "error" };
+            }
+        }
+
+        public async Task<IEnumerable<PurchaseRequest>> GetPurchesRequestsAsync()
+        {
+            var projects = await _dbcontext.PurchaseRequests
+                                           .OrderByDescending(p => p.RequestDate)
+                                           .ToListAsync();
+            return projects;
+        }
+
+        public async Task<APIResponse> UpdatePurchaseRequestStatusAsync(int purchaseId, string isStatus)
+        {
+            var entity = await _dbcontext.PurchaseRequests.FirstOrDefaultAsync(x => x.PurchaseId == purchaseId);
+            if (entity == null)
+            {
+                return new APIResponse { Code = 404, Status = "Failed", Message = "Purchase request not found." };
+            }
+
+            entity.IsStatus = isStatus;
+            await _dbcontext.SaveChangesAsync();
+
+            return new APIResponse { Code = 200, Status = "Success", Message = "Purchase request status updated." };
+        }
+
+        public async Task<APIResponse> SoftDeletePurchaseRequestAsync(int purchaseId)
+        {
+            var entity = await _dbcontext.PurchaseRequests.Where(x => x.PurchaseId == purchaseId).FirstOrDefaultAsync();
+            if (entity == null)
+            {
+                return new APIResponse { Code = 404, Status = "Failed", Message = "Purchase request not found." };
+            }
+
+            _dbcontext.PurchaseRequests.Remove(entity); // Correctly remove the entity from the DbContext
+            await _dbcontext.SaveChangesAsync(); // Save changes to persist the deletion
+
+            return new APIResponse { Code = 200, Status = "Success", Message = "Purchase request status updated (soft deleted)." };
+        }
+
+
+        // Updated code to fix CS8208 and CS0165 errors
+        public async Task<IEnumerable<PurchaseRequestDto>> GetPurchaseRequestsByStudentIdAsync(int studentId)
+        {
+            // Get the student's email by ID
+            var student = await _dbcontext.Students.FirstOrDefaultAsync(s => s.Id == studentId);
+            if (student == null)
+                return Enumerable.Empty<PurchaseRequestDto>();
+
+            var requests = await _dbcontext.PurchaseRequests
+                .Where(pr => pr.Email == student.Email)
+                .Select(pr => new PurchaseRequestDto
+                {
+                    PurchaseId = pr.PurchaseId,
+                    Email = pr.Email,
+                    ProjectId = pr.ProjectId,
+                    PurchaseDate = pr.RequestDate,
+                    IsPremium = pr.IsPremium,
+                    IsStatus = pr.IsStatus // Directly access the property without using 'dynamic'
+                })
+                .ToListAsync();
+
+            return requests;
+        }
     }
 }

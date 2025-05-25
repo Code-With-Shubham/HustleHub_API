@@ -28,6 +28,8 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<ProjectSkill> ProjectSkills { get; set; }
 
+    public virtual DbSet<PurchaseRequest> PurchaseRequests { get; set; }
+
     public virtual DbSet<Student> Students { get; set; }
 
     public virtual DbSet<StudentInfo> StudentInfos { get; set; }
@@ -81,6 +83,22 @@ public partial class ApplicationDbContext : DbContext
             entity.HasKey(e => e.SkillId).HasName("PK__ProjectS__DFA091E71B0FF988");
 
             entity.HasOne(d => d.Project).WithMany(p => p.ProjectSkills).HasConstraintName("FK_ProjectSkills_AdminProject");
+        });
+
+        modelBuilder.Entity<PurchaseRequest>(entity =>
+        {
+            entity.HasKey(e => e.PurchaseId).HasName("PK__Purchase__6B0A6BDEC04F8F85");
+
+            entity.Property(e => e.IsPremium).HasDefaultValue(false);
+            entity.Property(e => e.RequestDate).HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.EmailNavigation).WithMany(p => p.PurchaseRequests)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_StudentPurchase_Student");
+
+            entity.HasOne(d => d.Project).WithMany(p => p.PurchaseRequests)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_StudentPurchase_AdminProject");
         });
 
         modelBuilder.Entity<Student>(entity =>

@@ -2,7 +2,9 @@
 using HustleHub_API.BusinessLogic.Models;
 using HustleHub_API.BusinessLogic.Models.APIResponse;
 using HustleHub_API.BusinessLogic.Models.BusinessModels;
+using HustleHub_API.BusinessLogic.Models.DTOs;
 using HustleHub_API.DBContext.Entities.TableEntities;
+using HustleHub_API.BusinessLogic.Models.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,10 +23,8 @@ namespace HustleHub.BusinessArea.Interface
         Task<Student?> GetStudentByIdAsync(int id);
         Task<APIResponse> DeleteStudentAsync(int id);
         Task<StudProjAPIResponse> ProjectRequestByIDAsync(int id);
-
-
-
-
+        Task<IEnumerable<PurchaseRequestDto>> GetPurchaseRequestsByStudentIdAsync(int studentId);
+    }
 
         //Project Requirement   
         Task<APIResponse> SubmitProjectRequestAsync(RequiredProjectDTO model, IFormFile? projectDocFile);
@@ -41,8 +41,10 @@ namespace HustleHub.BusinessArea.Interface
         Task<IEnumerable<CategoryDTO>> GetAllCategoriesAsync();
         Task<APIResponse> AdminLoginAsync(AdminLoginDTO model);
 
-
-
-
+        //Purchase Requests
+        Task<APIResponse> PurchesRequestAsync(PurchaseRequestDto model);
+        Task<IEnumerable<PurchaseRequest>> GetPurchesRequestsAsync();
+        Task<APIResponse> UpdatePurchaseRequestStatusAsync(int purchaseId, string isStatus);
+        Task<APIResponse> SoftDeletePurchaseRequestAsync(int purchaseId);
     }
 }

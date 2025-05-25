@@ -50,5 +50,8 @@ public partial class Student
     public virtual ICollection<ProjectRequest> ProjectRequests { get; set; } = new List<ProjectRequest>();
 
     [InverseProperty("EmailNavigation")]
+    public virtual ICollection<PurchaseRequest> PurchaseRequests { get; set; } = new List<PurchaseRequest>();
+
+    [InverseProperty("EmailNavigation")]
     public virtual ICollection<StudentInfo> StudentInfos { get; set; } = new List<StudentInfo>();
 }
