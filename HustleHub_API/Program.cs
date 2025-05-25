@@ -7,6 +7,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -92,6 +93,13 @@ builder.Services.AddCors(options =>
                .AllowAnyMethod();
     });
 });
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 2 * 1024 * 1024; // 2MB
+});
+
+builder.Services.AddSingleton<EmailService>();
 
 var app = builder.Build();
 

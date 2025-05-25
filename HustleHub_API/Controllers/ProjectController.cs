@@ -29,9 +29,9 @@ namespace HustleHub_API.Controllers
 
         [Route("RegisterProject")]
         [HttpPost]
-        public async Task<IActionResult> Submit([FromForm] RequiredProjectDTO model, IFormFile? projectDocsFile)
+        public async Task<IActionResult> Submit([FromForm] RequiredProjectDTO model)
         {
-            var result = await objRep.SubmitProjectRequestAsync(model, projectDocsFile);
+            var result = await objRep.SubmitProjectRequestAsync(model, model.ProjectDocsFile);
             return StatusCode(result.Code, result);
         }
 
@@ -54,14 +54,14 @@ namespace HustleHub_API.Controllers
         [HttpPost]
         public async Task<IActionResult> PurchesRequest([FromForm] PurchaseRequestDto model)
         {
-            var result = await objRep.PurchesRequestAsync(model);
+            var result = await objRep.PurchaseRequestAsync(model);
             return StatusCode(result.Code, result);
         }
 
-        [HttpGet("GetPurchesRequests")]
-        public async Task<IActionResult> GetPurchesRequests()
+        [HttpGet("GetPurchaseRequests")]
+        public async Task<IActionResult> GetPurchaseRequests()
         {
-            var projects = await objRep.GetPurchesRequestsAsync();
+            var projects = await objRep.GetPurchaseRequestsAsync();
             return Ok(projects);
         }
 

@@ -24,7 +24,7 @@ public partial class ProjectRequest
 
     public string? Description { get; set; }
 
-    public string? ProjectDocs { get; set; }
+    public byte[]? ProjectDocs { get; set; }
 
     [StringLength(15)]
     public string? Mobile { get; set; }

@@ -39,7 +39,7 @@ public partial class Student
     [Column(TypeName = "datetime")]
     public DateTime? UpdateAt { get; set; }
 
-    public string? ProfilePic { get; set; }
+    public byte[]? ProfilePic { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime? LastLoginAt { get; set; }

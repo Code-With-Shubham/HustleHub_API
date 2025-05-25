@@ -24,7 +24,7 @@ namespace HustleHub.BusinessArea.Interface
         Task<APIResponse> DeleteStudentAsync(int id);
         Task<StudProjAPIResponse> ProjectRequestByIDAsync(int id);
         Task<IEnumerable<PurchaseRequestDto>> GetPurchaseRequestsByStudentIdAsync(int studentId);
-    }
+    
 
         //Project Requirement   
         Task<APIResponse> SubmitProjectRequestAsync(RequiredProjectDTO model, IFormFile? projectDocFile);
@@ -42,8 +42,8 @@ namespace HustleHub.BusinessArea.Interface
         Task<APIResponse> AdminLoginAsync(AdminLoginDTO model);
 
         //Purchase Requests
-        Task<APIResponse> PurchesRequestAsync(PurchaseRequestDto model);
-        Task<IEnumerable<PurchaseRequest>> GetPurchesRequestsAsync();
+        Task<APIResponse> PurchaseRequestAsync(PurchaseRequestDto model);
+        Task<IEnumerable<PurchaseRequest>> GetPurchaseRequestsAsync();
         Task<APIResponse> UpdatePurchaseRequestStatusAsync(int purchaseId, string isStatus);
         Task<APIResponse> SoftDeletePurchaseRequestAsync(int purchaseId);
     }
