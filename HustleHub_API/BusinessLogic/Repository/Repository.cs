@@ -246,7 +246,7 @@ namespace HustleHub.BusinessArea.Repository
                     ProjectType = model.ProjectType,
                     ComplexityLevel = model.ComplexityLevel,
                     Description = model.Description,
-                    ProjectDocs = projectDocBytes,
+                    ProjectDocs = projectDocBytes, // Ensure ProjectDocs is of type byte[]
                     Mobile = model.Mobile,
                     Budget = model.Budget,
                     Tcstatus = model.Tcstatus,
@@ -285,21 +285,7 @@ namespace HustleHub.BusinessArea.Repository
             var project = await _dbcontext.ProjectRequests
                                           .FirstOrDefaultAsync(p => p.Rpid == id);
 
-            if (project != null && project.ProjectDocs != null) // Fixed type mismatch by checking for null directly
-            {
-                var documentPath = Path.Combine(_environment.ContentRootPath, "Uploads", "ProjectDocs", Convert.ToBase64String(project.ProjectDocs));
-                if (File.Exists(documentPath))
-                {
-                    var documentBytes = await File.ReadAllBytesAsync(documentPath);
-                    project.ProjectDocs = documentBytes; // No conversion to string, keeping it as byte[]
-                }
-                else
-                {
-                    project.ProjectDocs = null;
-                }
-            }
-
-            return project; // No CS8603 warning since the method now explicitly allows null return
+            return project; 
         }
 
 
@@ -745,7 +731,7 @@ namespace HustleHub.BusinessArea.Repository
                 {
                     ProjectId = model.ProjectId,
                     Email = model.Email,
-                    RequestDate = DateTime.UtcNow,
+                    PurchaseDate = DateTime.UtcNow,
                     IsPremium = model.IsPremium,
                     IsStatus = "Pending",
                 };
@@ -769,7 +755,7 @@ namespace HustleHub.BusinessArea.Repository
         public async Task<IEnumerable<PurchaseRequest>> GetPurchaseRequestsAsync()
         {
             var projects = await _dbcontext.PurchaseRequests
-                                           .OrderByDescending(p => p.RequestDate)
+                                           .OrderByDescending(p => p.PurchaseDate)
                                            .ToListAsync();
             return projects;
         }
@@ -818,7 +804,7 @@ namespace HustleHub.BusinessArea.Repository
                     PurchaseId = pr.PurchaseId,
                     Email = pr.Email,
                     ProjectId = pr.ProjectId,
-                    PurchaseDate = pr.RequestDate,
+                    PurchaseDate = pr.PurchaseDate,
                     IsPremium = pr.IsPremium,
                     IsStatus = pr.IsStatus // If IsStatus exists
                 })

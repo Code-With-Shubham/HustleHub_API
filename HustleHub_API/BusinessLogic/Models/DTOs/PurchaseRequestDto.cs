@@ -6,7 +6,7 @@ namespace HustleHub_API.BusinessLogic.Models.DTOs
         public string Email { get; set; }
         public int ProjectId { get; set; }
         public DateTime? PurchaseDate { get; set; }
-        public bool? IsPremium { get; set; }
+        public String IsPremium { get; set; }
 
         public string? IsStatus { get; set; }
     }

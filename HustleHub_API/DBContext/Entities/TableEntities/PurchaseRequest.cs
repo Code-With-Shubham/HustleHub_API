@@ -20,11 +20,13 @@ public partial class PurchaseRequest
     public int ProjectId { get; set; }
 
     [Column(TypeName = "datetime")]
-    public DateTime? RequestDate { get; set; }
+    public DateTime? PurchaseDate { get; set; }
 
-    public bool? IsPremium { get; set; }
+    [StringLength(20)]
+    [Unicode(false)]
+    public string? IsPremium { get; set; }
 
-    [StringLength(15)]
+    [StringLength(20)]
     [Unicode(false)]
     public string? IsStatus { get; set; }
 
