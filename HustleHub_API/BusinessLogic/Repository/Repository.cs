@@ -766,10 +766,10 @@ namespace HustleHub.BusinessArea.Repository
                 _dbcontext.PurchaseRequests.Add(project);
                 await _dbcontext.SaveChangesAsync();
 
-                await _emailService.SendEmailAsync(
-                    "New Purchase Request Submitted",
-                    $"A new purchase request was submitted by {model.Email} for ProjectId: {model.ProjectId}."
-                );
+                //await _emailService.SendEmailAsync(
+                //    "New Purchase Request Submitted",
+                //    $"A new purchase request was submitted by {model.Email} for ProjectId: {model.ProjectId}."
+                //);
 
                 return new APIResponse { Code = 200, Message = "Purches request submitted successfully", Status = "success" };
             }
