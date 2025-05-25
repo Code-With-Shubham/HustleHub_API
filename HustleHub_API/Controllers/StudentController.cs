@@ -61,9 +61,9 @@ namespace HustleHub_API.Controllers
         [HttpPost("RegisterStudent")]
         [EnableCors("MyCorsPolicy")]
         [AllowAnonymous]
-        public async Task<IActionResult> RegisterStudent([FromForm] StudentDTO model, IFormFile? profilePicFile)
+        public async Task<IActionResult> RegisterStudent([FromForm] StudentDTO model)
         {
-            var result = await _repository.RegisterStudentAsync(model, profilePicFile);
+            var result = await _repository.RegisterStudentAsync(model);
             return StatusCode(result.Code, result);
         }
 

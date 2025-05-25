@@ -136,20 +136,26 @@ namespace HustleHub.BusinessArea.Repository
         }
 
 
-        public async Task<APIResponse> RegisterStudentAsync(StudentDTO model, IFormFile? profilePicFile)
+        public async Task<APIResponse> RegisterStudentAsync(StudentDTO model)
         {
             APIResponse result = new APIResponse();
             try
             {
                 byte[]? profilePicBytes = null;
-                if (profilePicFile != null && profilePicFile.Length > 0)
-                {
-                    if (profilePicFile.Length > 2 * 1024 * 1024)
-                        return new APIResponse { Code = 400, Status = "error", Message = "Profile picture size must be less than 2MB." };
 
-                    using var ms = new MemoryStream();
-                    await profilePicFile.CopyToAsync(ms);
-                    profilePicBytes = ms.ToArray();
+                if (model.ProfilePicBase64 != null && model.ProfilePicBase64.Length > 0)
+                {
+                    if (model.ProfilePicBase64.Length > 2 * 1024 * 1024)
+                    {
+                        return new APIResponse
+                        {
+                            Code = 400,
+                            Status = "error",
+                            Message = "Profile picture size must be less than 2MB."
+                        };
+                    }
+
+                    profilePicBytes = model.ProfilePicBase64;
                 }
 
                 Student obj = new Student
@@ -163,7 +169,9 @@ namespace HustleHub.BusinessArea.Repository
                     CreatedAt = DateTime.Now,
                     UpdateAt = null,
                     IsActive = true,
-                    Status = true
+                    Status = true,
+                    Course = model.Course,
+                    LastLoginAt = model.LastLoginAt
                 };
 
                 _dbcontext.Students.Add(obj);
@@ -192,6 +200,7 @@ namespace HustleHub.BusinessArea.Repository
                 return result;
             }
         }
+
 
         public async Task<List<Student>> GetAllStudentsAsync()
         {

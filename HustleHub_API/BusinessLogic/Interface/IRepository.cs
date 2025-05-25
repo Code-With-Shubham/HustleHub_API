@@ -17,7 +17,7 @@ namespace HustleHub.BusinessArea.Interface
     {
         //Student Registration
         Task<LoginResponse> StudentLoginAsync(StudentLoginDTO model);
-        Task<APIResponse> RegisterStudentAsync(StudentDTO model, IFormFile? profilePicFile);
+        Task<APIResponse> RegisterStudentAsync(StudentDTO model);
         Task<List<Student>> GetAllStudentsAsync();
         Task<Student?> GetStudentByEmailAsync(string email);
         Task<Student?> GetStudentByIdAsync(int id);
