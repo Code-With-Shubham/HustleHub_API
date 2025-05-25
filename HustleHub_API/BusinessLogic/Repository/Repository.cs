@@ -407,8 +407,18 @@ namespace HustleHub.BusinessArea.Repository
                     {
                         try
                         {
-                            byte[] imageBytes = Convert.FromBase64String(model.Image);
-                            projectIconBytes = imageBytes; // ✅ FIXED HERE
+                            // If the image string contains the base64 prefix, remove it
+                            var base64String = model.Image;
+
+                            if (model.Image.Contains(","))
+                            {
+                                base64String = model.Image.Substring(model.Image.IndexOf(",") + 1);
+                            }
+
+                            // Remove whitespace and convert
+                            base64String = base64String.Trim();
+                            byte[] imageBytes = Convert.FromBase64String(base64String);
+                            projectIconBytes = imageBytes;
                         }
                         catch
                         {
@@ -420,6 +430,7 @@ namespace HustleHub.BusinessArea.Repository
                             };
                         }
                     }
+
 
                     model.CreatedAt = DateTime.UtcNow;
                     model.UpdatedAt = null;
