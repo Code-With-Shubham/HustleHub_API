@@ -213,31 +213,52 @@ namespace HustleHub.BusinessArea.Repository
         }
 
 
-        //Project Requirement
+        // Fix for CS1061: Replace the incorrect usage of CopyToAsync on a byte[] with the correct logic.
 
-        public async Task<APIResponse> SubmitProjectRequestAsync(RequiredProjectDTO model, IFormFile? projectDocFile)
+        public async Task<APIResponse> SubmitProjectRequestAsync(RequiredProjectDTO model)
         {
             try
             {
-                var mailcheck = await _dbcontext.Students.Where(x => x.Email == model.Email || x.Mobile == model.Mobile).FirstOrDefaultAsync();
-                if (mailcheck == null)
-                {
-                    return new APIResponse { Code = 400, Message = "This email id not registered", Status = "error" };
-                }
                 if (string.IsNullOrEmpty(model.Email))
                 {
                     return new APIResponse { Code = 400, Message = "Email cannot be null", Status = "error" };
                 }
 
-                byte[]? projectDocBytes = null;
-                if (projectDocFile != null && projectDocFile.Length > 0)
-                {
-                    if (projectDocFile.Length > 2 * 1024 * 1024)
-                        return new APIResponse { Code = 400, Message = "Project document size must be less than 2MB.", Status = "error" };
+                var mailcheck = await _dbcontext.Students
+                    .Where(x => x.Email == model.Email || x.Mobile == model.Mobile)
+                    .FirstOrDefaultAsync();
 
-                    using var ms = new MemoryStream();
-                    await projectDocFile.CopyToAsync(ms);
-                    projectDocBytes = ms.ToArray();
+                if (mailcheck == null)
+                {
+                    return new APIResponse { Code = 400, Message = "This email id is not registered", Status = "error" };
+                }
+
+                byte[]? projectDocBytes = null;
+                if (!string.IsNullOrEmpty(model.ProjectDocsBase64))
+                {
+                    try
+                    {
+                        projectDocBytes = Convert.FromBase64String(model.ProjectDocsBase64);
+
+                        if (projectDocBytes.Length > 2 * 1024 * 1024)
+                        {
+                            return new APIResponse
+                            {
+                                Code = 400,
+                                Message = "Project document size must be less than 2MB.",
+                                Status = "error"
+                            };
+                        }
+                    }
+                    catch (FormatException)
+                    {
+                        return new APIResponse
+                        {
+                            Code = 400,
+                            Message = "Invalid Base64 format for project document.",
+                            Status = "error"
+                        };
+                    }
                 }
 
                 var project = new ProjectRequest
@@ -246,7 +267,7 @@ namespace HustleHub.BusinessArea.Repository
                     ProjectType = model.ProjectType,
                     ComplexityLevel = model.ComplexityLevel,
                     Description = model.Description,
-                    ProjectDocs = projectDocBytes, // Ensure ProjectDocs is of type byte[]
+                    ProjectDocs = projectDocBytes,
                     Mobile = model.Mobile,
                     Budget = model.Budget,
                     Tcstatus = model.Tcstatus,
@@ -258,35 +279,24 @@ namespace HustleHub.BusinessArea.Repository
                 _dbcontext.ProjectRequests.Add(project);
                 await _dbcontext.SaveChangesAsync();
 
-                return new APIResponse { Code = 200, Message = "Project request submitted successfully", Status = "success" };
+                return new APIResponse
+                {
+                    Code = 200,
+                    Message = "Project request submitted successfully",
+                    Status = "success"
+                };
             }
             catch (Exception ex)
             {
-                return new APIResponse { Code = 500, Message = "Error: " + ex.Message, Status = "error" };
-            }
-        }
-        public async Task<IEnumerable<ProjectRequest>> GetAllProjectsAsync()
-        {
-            var projects = await _dbcontext.ProjectRequests.OrderByDescending(p => p.UpdateDate).ToListAsync();
-
-            foreach (var project in projects)
-            {
-                if (project.ProjectDocs != null && project.ProjectDocs.Length > 0)
+                return new APIResponse
                 {
-                    // Optionally convert to Base64 for API response
-                    // project.ProjectDocs = project.ProjectDocs;
-                }
+                    Code = 500,
+                    Message = "Error: " + ex.Message,
+                    Status = "error"
+                };
             }
-
-            return projects;
         }
-        public async Task<ProjectRequest?> GetProjectByIdAsync(int id) // Updated return type to allow nullability
-        {
-            var project = await _dbcontext.ProjectRequests
-                                          .FirstOrDefaultAsync(p => p.Rpid == id);
 
-            return project; 
-        }
 
 
         public async Task<StudProjAPIResponse> ProjectRequestByIDAsync(int id)
@@ -322,6 +332,7 @@ namespace HustleHub.BusinessArea.Repository
                         ProjectType = p.ProjectType,
                         ComplexityLevel = p.ComplexityLevel,
                         Description = p.Description,
+                        // Fix for CS0029: Correctly convert byte[] to Base64 string and assign it to ProjectDocsBase64
                         ProjectDocsBase64 = p.ProjectDocs != null ? Convert.ToBase64String(p.ProjectDocs) : null,
                         Mobile = p.Mobile,
                         Budget = p.Budget ?? 0m,
@@ -403,7 +414,7 @@ namespace HustleHub.BusinessArea.Repository
                         LongDescription = model.LongDescription,
                         Description2 = model.Description2,
                         Image = ProjectIcon,
-                        Category = model.Category,
+                        CategoryId = model.Category,
                         BasePrice = model.BasePrice,
                         PremiumPrice = model.PremiumPrice,
                         CreatedAt = model.CreatedAt,
@@ -482,7 +493,7 @@ namespace HustleHub.BusinessArea.Repository
                     Description1 = project.Description1,
                     LongDescription = project.LongDescription,
                     Description2 = project.Description2,
-                    Category = project.Category,
+                    Category = project.CategoryId,
                     LearningOutcomes = project.LearningOutcomes,
                     BasePrice = project.BasePrice,
                     PremiumPrice = project.PremiumPrice,
@@ -525,7 +536,7 @@ namespace HustleHub.BusinessArea.Repository
                 Description1 = project.Description1,
                 LongDescription = project.LongDescription,
                 Description2 = project.Description2,
-                Category = project.Category,
+                Category = project.CategoryId,
                 LearningOutcomes = project.LearningOutcomes,
                 BasePrice = project.BasePrice,
                 PremiumPrice = project.PremiumPrice,
@@ -811,6 +822,26 @@ namespace HustleHub.BusinessArea.Repository
                 .ToListAsync();
 
             return requests;
+        }
+
+        public async Task<IEnumerable<ProjectRequest>> GetAllProjectsAsync()
+        {
+            var projects = await _dbcontext.ProjectRequests.OrderByDescending(p => p.UpdateDate).ToListAsync();
+            return projects;
+        }
+        public async Task<ProjectRequest?> GetProjectByIdAsync(int id)
+        {
+            try
+            {
+                // Fetch the project by ID
+                var project = await _dbcontext.ProjectRequests.FirstOrDefaultAsync(p => p.Rpid == id);
+                return project;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching project by ID: {ex.Message}");
+                return null;
+            }
         }
     }
 }

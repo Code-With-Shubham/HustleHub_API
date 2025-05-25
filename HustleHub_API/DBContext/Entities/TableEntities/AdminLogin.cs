@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HustleHub_API.DBContext.Entities.TableEntities;
 
-[Index("Email", Name = "UQ__AdminLog__A9D10534D63175B4", IsUnique = true)]
+[Index("Email", Name = "UQ__AdminLog__A9D105344D3BE214", IsUnique = true)]
 public partial class AdminLogin
 {
     [Key]

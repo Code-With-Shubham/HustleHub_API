@@ -7,7 +7,6 @@
         public string? ProjectType { get; set; }
         public string? ComplexityLevel { get; set; }
         public string? Description { get; set; }
-        public IFormFile? ProjectDocsFile { get; set; }
         public string? ProjectDocsBase64 { get; set; }
         public string? Mobile { get; set; }
         public decimal Budget { get; set; }

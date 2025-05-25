@@ -17,7 +17,6 @@ namespace HustleHub_API.BusinessLogic.Models.BusinessModels
         public DateTime? UpdateAt { get; set; }
         public DateTime? LastLoginAt { get; set; }
         public bool? IsActive { get; set; }
-        public IFormFile? ProfilePicFile { get; set; }
-        public string? ProfilePicBase64 { get; set; }
+        public byte[]? ProfilePicBase64 { get; set; }
     }
 }

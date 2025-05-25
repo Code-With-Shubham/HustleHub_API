@@ -24,10 +24,10 @@ namespace HustleHub.BusinessArea.Interface
         Task<APIResponse> DeleteStudentAsync(int id);
         Task<StudProjAPIResponse> ProjectRequestByIDAsync(int id);
         Task<IEnumerable<PurchaseRequestDto>> GetPurchaseRequestsByStudentIdAsync(int studentId);
-    
+
 
         //Project Requirement   
-        Task<APIResponse> SubmitProjectRequestAsync(RequiredProjectDTO model, IFormFile? projectDocFile);
+        Task<APIResponse> SubmitProjectRequestAsync(RequiredProjectDTO model);
         Task<IEnumerable<ProjectRequest>> GetAllProjectsAsync();
         Task<ProjectRequest?> GetProjectByIdAsync(int id);
 

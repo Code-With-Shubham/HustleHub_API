@@ -37,19 +37,17 @@ public partial class ApplicationDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
     //        => optionsBuilder.UseSqlServer("Server=hustlehub.cfw6scimuwug.ap-south-1.rds.amazonaws.com,1433;Database=hustlehubdb;User Id=hustlehub;Password=Manohares;TrustServerCertificate=True");
-    {
-
-    }
+    { }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AdminLogin>(entity =>
         {
-            entity.HasKey(e => e.AdminId).HasName("PK__AdminLog__719FE4E8C9FF002A");
+            entity.HasKey(e => e.AdminId).HasName("PK__AdminLog__719FE4E8DAAAAC9D");
         });
 
         modelBuilder.Entity<AdminProject>(entity =>
         {
-            entity.HasKey(e => e.ProjectId).HasName("PK__AdminPro__761ABED0A20E5146");
+            entity.HasKey(e => e.ProjectId).HasName("PK__AdminPro__761ABED0B97D2FF5");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.DisplayStatus).HasDefaultValue(true);
@@ -57,17 +55,17 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<CareerPath>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__CareerPa__3214EC27104B6F1E");
+            entity.HasKey(e => e.Id).HasName("PK__CareerPa__3214EC278EF1C62C");
         });
 
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => e.CategoryId).HasName("PK__Category__19093A2BD7C7F71B");
+            entity.HasKey(e => e.CategoryId).HasName("PK__Category__19093A2BFD395456");
         });
 
         modelBuilder.Entity<ProjectRequest>(entity =>
         {
-            entity.HasKey(e => e.Rpid).HasName("PK__ProjectR__4484A833B76D2FFD");
+            entity.HasKey(e => e.Rpid).HasName("PK__ProjectR__4484A8331AB66385");
 
             entity.Property(e => e.RequestDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Status).HasDefaultValue(true);
@@ -80,14 +78,14 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<ProjectSkill>(entity =>
         {
-            entity.HasKey(e => e.SkillId).HasName("PK__ProjectS__DFA091E71B0FF988");
+            entity.HasKey(e => e.SkillId).HasName("PK__ProjectS__DFA091E70D06ECCD");
 
             entity.HasOne(d => d.Project).WithMany(p => p.ProjectSkills).HasConstraintName("FK_ProjectSkills_AdminProject");
         });
 
         modelBuilder.Entity<PurchaseRequest>(entity =>
         {
-            entity.HasKey(e => e.PurchaseId).HasName("PK__Purchase__6B0A6BDE18BA7966");
+            entity.HasKey(e => e.PurchaseId).HasName("PK__Purchase__6B0A6BDE39F86197");
 
             entity.Property(e => e.PurchaseDate).HasDefaultValueSql("(getdate())");
 
@@ -102,7 +100,7 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<Student>(entity =>
         {
-            entity.HasKey(e => e.Email).HasName("PK__Student__A9D10535D809C97C");
+            entity.HasKey(e => e.Email).HasName("PK__Student__A9D10535BB524F8E");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
@@ -112,7 +110,7 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<StudentInfo>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__StudentI__3214EC2776B0093A");
+            entity.HasKey(e => e.Id).HasName("PK__StudentI__3214EC276D4A222E");
 
             entity.HasOne(d => d.EmailNavigation).WithMany(p => p.StudentInfos)
                 .OnDelete(DeleteBehavior.ClientSetNull)

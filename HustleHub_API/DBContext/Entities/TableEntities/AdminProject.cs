@@ -26,8 +26,9 @@ public partial class AdminProject
 
     public string? Image { get; set; }
 
+    [Column("CategoryID")]
     [StringLength(100)]
-    public string? Category { get; set; }
+    public string? CategoryId { get; set; }
 
     public string? LearningOutcomes { get; set; }
 

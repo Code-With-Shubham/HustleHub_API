@@ -31,7 +31,7 @@ namespace HustleHub_API.Controllers
         [HttpPost]
         public async Task<IActionResult> Submit([FromForm] RequiredProjectDTO model)
         {
-            var result = await objRep.SubmitProjectRequestAsync(model, model.ProjectDocsFile);
+            var result = await objRep.SubmitProjectRequestAsync(model);
             return StatusCode(result.Code, result);
         }
 
