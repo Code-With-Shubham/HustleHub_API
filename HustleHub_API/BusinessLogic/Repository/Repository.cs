@@ -760,6 +760,7 @@ namespace HustleHub.BusinessArea.Repository
                     Email = model.Email,
                     PurchaseDate = DateTime.UtcNow,
                     IsPremium = model.IsPremium,
+                    IsBasic = model.IsBasic,
                     IsStatus = "Pending",
                 };
 

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace HustleHub_API.DBContext.Entities.TableEntities;
 
 [Table("Category")]
-[Index("CategoryName", Name = "UQ__Category__8517B2E0EBE0AD7C", IsUnique = true)]
+[Index("CategoryName", Name = "UQ__Category__8517B2E0FEB50E67", IsUnique = true)]
 public partial class Category
 {
     [Key]

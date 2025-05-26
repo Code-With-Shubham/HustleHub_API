@@ -23,11 +23,12 @@ public partial class PurchaseRequest
     public DateTime? PurchaseDate { get; set; }
 
     [StringLength(20)]
-    [Unicode(false)]
     public string? IsPremium { get; set; }
 
     [StringLength(20)]
-    [Unicode(false)]
+    public string? IsBasic { get; set; }
+
+    [StringLength(20)]
     public string? IsStatus { get; set; }
 
     [ForeignKey("Email")]

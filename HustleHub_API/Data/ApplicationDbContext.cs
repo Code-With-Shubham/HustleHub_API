@@ -35,19 +35,19 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<StudentInfo> StudentInfos { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-    //        => optionsBuilder.UseSqlServer("Server=hustlehub.cfw6scimuwug.ap-south-1.rds.amazonaws.com,1433;Database=hustlehubdb;User Id=hustlehub;Password=Manohares;TrustServerCertificate=True");
-    { }
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=hustlehub.cfw6scimuwug.ap-south-1.rds.amazonaws.com,1433;Database=hustlehubdb;User Id=hustlehub;Password=Manohares;TrustServerCertificate=True");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AdminLogin>(entity =>
         {
-            entity.HasKey(e => e.AdminId).HasName("PK__AdminLog__719FE4E89B8C5C2B");
+            entity.HasKey(e => e.AdminId).HasName("PK__AdminLog__719FE4E8D5E78344");
         });
 
         modelBuilder.Entity<AdminProject>(entity =>
         {
-            entity.HasKey(e => e.ProjectId).HasName("PK__AdminPro__761ABED058340FC6");
+            entity.HasKey(e => e.ProjectId).HasName("PK__AdminPro__761ABED03E132434");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.DisplayStatus).HasDefaultValue(true);
@@ -55,17 +55,17 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<CareerPath>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__CareerPa__3214EC2732D47BD5");
+            entity.HasKey(e => e.Id).HasName("PK__CareerPa__3214EC27AF695E04");
         });
 
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => e.CategoryId).HasName("PK__Category__19093A2BDCFC11F5");
+            entity.HasKey(e => e.CategoryId).HasName("PK__Category__19093A2B9C3024FB");
         });
 
         modelBuilder.Entity<ProjectRequest>(entity =>
         {
-            entity.HasKey(e => e.Rpid).HasName("PK__ProjectR__4484A8336E300611");
+            entity.HasKey(e => e.Rpid).HasName("PK__ProjectR__4484A8331234398A");
 
             entity.Property(e => e.RequestDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Status).HasDefaultValue(true);
@@ -78,14 +78,14 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<ProjectSkill>(entity =>
         {
-            entity.HasKey(e => e.SkillId).HasName("PK__ProjectS__DFA091E714523438");
+            entity.HasKey(e => e.SkillId).HasName("PK__ProjectS__DFA091E72CDD92AE");
 
             entity.HasOne(d => d.Project).WithMany(p => p.ProjectSkills).HasConstraintName("FK_ProjectSkills_AdminProject");
         });
 
         modelBuilder.Entity<PurchaseRequest>(entity =>
         {
-            entity.HasKey(e => e.PurchaseId).HasName("PK__Purchase__6B0A6BDE4405E5A2");
+            entity.HasKey(e => e.PurchaseId).HasName("PK__Purchase__6B0A6BDE26EC7782");
 
             entity.Property(e => e.PurchaseDate).HasDefaultValueSql("(getdate())");
 
@@ -100,7 +100,7 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<Student>(entity =>
         {
-            entity.HasKey(e => e.Email).HasName("PK__Student__A9D105356A85CD1B");
+            entity.HasKey(e => e.Email).HasName("PK__Student__A9D10535300DE5A6");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
@@ -110,7 +110,7 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<StudentInfo>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__StudentI__3214EC278F376A17");
+            entity.HasKey(e => e.Id).HasName("PK__StudentI__3214EC2703586849");
 
             entity.HasOne(d => d.EmailNavigation).WithMany(p => p.StudentInfos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
