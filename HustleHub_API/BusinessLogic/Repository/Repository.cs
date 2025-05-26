@@ -391,7 +391,7 @@ namespace HustleHub.BusinessArea.Repository
 
 
         //Admin Project
-        public async Task<APIResponse> AddAdminProjectAsync(AdminProjectDTO model)
+        public async Task<APIResponse> AddAdminProjectAsync(AdminProjectDTO dto)
         {
             var strategy = _dbcontext.Database.CreateExecutionStrategy();
 
@@ -401,44 +401,41 @@ namespace HustleHub.BusinessArea.Repository
 
                 try
                 {
-                    byte[]? projectIconBytes = null;
+                    byte[]? imageBytes = null;
 
-                    // ✅ Convert IFormFile to byte[]
-                    if (model.ImageFile != null && model.ImageFile.Length > 0)
+                    if (dto.ImageFile != null && dto.ImageFile.Length > 0)
                     {
-                        using var ms = new MemoryStream();
-                        await model.ImageFile.CopyToAsync(ms);
-                        projectIconBytes = ms.ToArray();
+                        using (var ms = new MemoryStream())
+                        {
+                            await dto.ImageFile.CopyToAsync(ms);
+                            imageBytes = ms.ToArray();
+                        }
                     }
 
-                    model.CreatedAt = DateTime.UtcNow;
-                    model.UpdatedAt = null;
-
-                    var obj = new AdminProject
+                    var project = new AdminProject
                     {
-                        YoutubeLink = model.YoutubeLink,
-                        ProjectName = model.ProjectName,
-                        LearningOutcomes = model.LearningOutcomes,
-                        Description1 = model.Description1,
-                        LongDescription = model.LongDescription,
-                        Description2 = model.Description2,
-                        Image = projectIconBytes,
-                        CategoryId = model.Category,
-                        BasePrice = model.BasePrice,
-                        PremiumPrice = model.PremiumPrice,
-                        CreatedAt = model.CreatedAt,
-                        UpdatedAt = model.UpdatedAt,
-                        DisplayStatus = true
+                        ProjectName = dto.ProjectName,
+                        YoutubeLink = dto.YoutubeLink,
+                        Description1 = dto.Description1,
+                        LongDescription = dto.LongDescription,
+                        Description2 = dto.Description2,
+                        CategoryId = dto.Category,
+                        LearningOutcomes = dto.LearningOutcomes,
+                        BasePrice = dto.BasePrice,
+                        PremiumPrice = dto.PremiumPrice,
+                        CreatedAt = DateTime.UtcNow,
+                        DisplayStatus = dto.DisplayStatus,
+                        Image = imageBytes // ✅ save to database
                     };
 
-                    _dbcontext.AdminProjects.Add(obj);
+                    _dbcontext.AdminProjects.Add(project);
                     await _dbcontext.SaveChangesAsync();
 
-                    if (model.Skills != null && model.Skills.Any())
+                    if (dto.Skills != null && dto.Skills.Any())
                     {
-                        var projectSkills = model.Skills.Select(skill => new ProjectSkill
+                        var projectSkills = dto.Skills.Select(skill => new ProjectSkill
                         {
-                            ProjectId = obj.ProjectId,
+                            ProjectId = project.ProjectId,
                             SkillName = skill
                         });
 
