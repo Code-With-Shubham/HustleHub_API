@@ -145,9 +145,10 @@ namespace HustleHub.BusinessArea.Repository
             {
                 byte[]? profilePicBytes = null;
 
-                if (model.ProfilePicBase64 != null && model.ProfilePicBase64.Length > 0)
+                // Handle image from form-data
+                if (model.ProfilePic != null && model.ProfilePic.Length > 0)
                 {
-                    if (model.ProfilePicBase64.Length > 2 * 1024 * 1024)
+                    if (model.ProfilePic.Length > 2 * 1024 * 1024)
                     {
                         return new APIResponse
                         {
@@ -157,7 +158,11 @@ namespace HustleHub.BusinessArea.Repository
                         };
                     }
 
-                    profilePicBytes = model.ProfilePicBase64;
+                    using (var ms = new MemoryStream())
+                    {
+                        await model.ProfilePic.CopyToAsync(ms);
+                        profilePicBytes = ms.ToArray();
+                    }
                 }
 
                 Student obj = new Student
@@ -202,6 +207,7 @@ namespace HustleHub.BusinessArea.Repository
                 return result;
             }
         }
+
 
 
         public async Task<List<Student>> GetAllStudentsAsync()
