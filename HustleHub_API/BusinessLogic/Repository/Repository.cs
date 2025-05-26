@@ -6,6 +6,8 @@ using HustleHub_API.BusinessLogic.Models.BusinessModels;
 using HustleHub_API.BusinessLogic.Models.DTOs;
 using HustleHub_API.Data;
 using HustleHub_API.DBContext.Entities.TableEntities;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
@@ -224,7 +226,13 @@ namespace HustleHub.BusinessArea.Repository
 
         // Fix for CS1061: Replace the incorrect usage of CopyToAsync on a byte[] with the correct logic.
 
-        public async Task<APIResponse> SubmitProjectRequestAsync(RequiredProjectDTO model)
+        public async Task<IEnumerable<ProjectRequest>> GetAllProjectsAsync()
+        {
+            var projects = await _dbcontext.ProjectRequests.OrderByDescending(p => p.UpdateDate).ToListAsync();
+            return projects;
+        }
+
+        public async Task<APIResponse> SubmitProjectRequestAsync([FromForm] RequiredProjectDTO model)
         {
             try
             {
@@ -234,8 +242,7 @@ namespace HustleHub.BusinessArea.Repository
                 }
 
                 var mailcheck = await _dbcontext.Students
-                    .Where(x => x.Email == model.Email || x.Mobile == model.Mobile)
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync(x => x.Email == model.Email || x.Mobile == model.Mobile);
 
                 if (mailcheck == null)
                 {
@@ -243,41 +250,25 @@ namespace HustleHub.BusinessArea.Repository
                 }
 
                 byte[]? projectDocBytes = null;
-                if (!string.IsNullOrEmpty(model.ProjectDocsBase64))
+
+                if (model.ProjectDocs != null && model.ProjectDocs.Length > 0)
                 {
-                    try
-                    {
-                        // Strip out data URI scheme if present
-                        var base64Data = model.ProjectDocsBase64;
-
-                        if (base64Data.Contains(","))
-                        {
-                            base64Data = base64Data.Substring(base64Data.IndexOf(",") + 1);
-                        }
-
-                        projectDocBytes = Convert.FromBase64String(base64Data);
-
-                        if (projectDocBytes.Length > 2 * 1024 * 1024)
-                        {
-                            return new APIResponse
-                            {
-                                Code = 400,
-                                Message = "Project document size must be less than 2MB.",
-                                Status = "error"
-                            };
-                        }
-                    }
-                    catch (FormatException)
+                    if (model.ProjectDocs.Length > 2 * 1024 * 1024) // 2MB
                     {
                         return new APIResponse
                         {
                             Code = 400,
-                            Message = "Invalid Base64 format for project document. Ensure the file is properly encoded.",
+                            Message = "Project document size must be less than 2MB.",
                             Status = "error"
                         };
                     }
-                }
 
+                    using (var ms = new MemoryStream())
+                    {
+                        await model.ProjectDocs.CopyToAsync(ms);
+                        projectDocBytes = ms.ToArray();
+                    }
+                }
 
                 var project = new ProjectRequest
                 {
@@ -291,7 +282,10 @@ namespace HustleHub.BusinessArea.Repository
                     Tcstatus = model.Tcstatus,
                     ApprovedBy = model.ApprovedBy,
                     ApprovedDate = model.ApprovedDate,
-                    UpdateDate = DateTime.UtcNow
+                    RequestDate = DateTime.UtcNow,
+                    UpdateDate = DateTime.UtcNow,
+                    UpdateCount = model.UpdateCount,
+                    Status = true
                 };
 
                 _dbcontext.ProjectRequests.Add(project);
@@ -309,11 +303,12 @@ namespace HustleHub.BusinessArea.Repository
                 return new APIResponse
                 {
                     Code = 500,
-                    Message = "Error: " + ex.Message,
+                    Message = $"Error: {ex.Message}",
                     Status = "error"
                 };
             }
         }
+
 
 
 
@@ -328,7 +323,8 @@ namespace HustleHub.BusinessArea.Repository
                         Id = s.Id,
                         Name = s.Name,
                         Email = s.Email
-                    }).FirstOrDefaultAsync();
+                    })
+                    .FirstOrDefaultAsync();
 
                 if (student == null)
                 {
@@ -350,15 +346,18 @@ namespace HustleHub.BusinessArea.Repository
                         ProjectType = p.ProjectType,
                         ComplexityLevel = p.ComplexityLevel,
                         Description = p.Description,
-                        // Fix for CS0029: Correctly convert byte[] to Base64 string and assign it to ProjectDocsBase64
+
+                        // ✅ Convert varbinary (byte[]) to Base64 string for response
                         ProjectDocsBase64 = p.ProjectDocs != null ? Convert.ToBase64String(p.ProjectDocs) : null,
+
                         Mobile = p.Mobile,
                         Budget = p.Budget ?? 0m,
                         ApprovedBy = p.ApprovedBy,
                         ApprovedDate = p.ApprovedDate,
                         UpdateAt = p.UpdateDate ?? DateTime.MinValue,
                         UpdateCount = p.UpdateCount
-                    }).ToListAsync();
+                    })
+                    .ToListAsync();
 
                 return new StudProjAPIResponse
                 {
@@ -383,7 +382,6 @@ namespace HustleHub.BusinessArea.Repository
                 };
             }
         }
-
 
 
 
@@ -847,11 +845,9 @@ namespace HustleHub.BusinessArea.Repository
             return requests;
         }
 
-        public async Task<IEnumerable<ProjectRequest>> GetAllProjectsAsync()
-        {
-            var projects = await _dbcontext.ProjectRequests.OrderByDescending(p => p.UpdateDate).ToListAsync();
-            return projects;
-        }
+       
+
+
         public async Task<ProjectRequest?> GetProjectByIdAsync(int id)
         {
             try
