@@ -19,9 +19,10 @@ namespace HustleHub_API.BusinessLogic.Models
         public DateTime? UpdatedAt { get; set; }
         public bool? DisplayStatus { get; set; }
 
-        /// <summary>
-        /// Base64 encoded string of the image (with or without data:image/... prefix)
-        /// </summary>
+        // 👇 Only for image upload (POST/PUT)
+        public IFormFile? ImageFile { get; set; }
+
+        // 👇 Only for image display (GET)
         public string? Image { get; set; }
 
         public List<string>? Skills { get; set; }

@@ -403,26 +403,12 @@ namespace HustleHub.BusinessArea.Repository
                 {
                     byte[]? projectIconBytes = null;
 
-                    if (!string.IsNullOrEmpty(model.Image))
+                    // ✅ Convert IFormFile to byte[]
+                    if (model.ImageFile != null && model.ImageFile.Length > 0)
                     {
-                        try
-                        {
-                            // Remove MIME prefix if present
-                            var base64Data = model.Image.Contains(",")
-                                ? model.Image.Substring(model.Image.IndexOf(",") + 1)
-                                : model.Image;
-
-                            projectIconBytes = Convert.FromBase64String(base64Data);
-                        }
-                        catch (FormatException)
-                        {
-                            return new APIResponse
-                            {
-                                Code = 400,
-                                Status = "error",
-                                Message = "Invalid Base64 format for project icon image. Make sure it's a valid Base64 string."
-                            };
-                        }
+                        using var ms = new MemoryStream();
+                        await model.ImageFile.CopyToAsync(ms);
+                        projectIconBytes = ms.ToArray();
                     }
 
                     model.CreatedAt = DateTime.UtcNow;
@@ -482,6 +468,8 @@ namespace HustleHub.BusinessArea.Repository
             });
         }
 
+
+
         public async Task<IEnumerable<AdminProjectDTO>> GetAllAdminProjectsAsync()
         {
             var projects = await _dbcontext.AdminProjects
@@ -496,7 +484,6 @@ namespace HustleHub.BusinessArea.Repository
 
                 if (project.Image != null && project.Image.Length > 0)
                 {
-                    // Optional: Add data URI prefix
                     imageBase64 = "data:image/png;base64," + Convert.ToBase64String(project.Image);
                 }
 
@@ -520,7 +507,7 @@ namespace HustleHub.BusinessArea.Repository
                     CreatedAt = project.CreatedAt,
                     UpdatedAt = project.UpdatedAt,
                     DisplayStatus = project.DisplayStatus,
-                    Image = imageBase64,
+                    Image = imageBase64, // ✅ for display
                     Skills = skills
                 });
             }
@@ -537,6 +524,7 @@ namespace HustleHub.BusinessArea.Repository
                 return null;
 
             string? imageBase64 = null;
+
             if (project.Image != null && project.Image.Length > 0)
             {
                 imageBase64 = "data:image/png;base64," + Convert.ToBase64String(project.Image);
@@ -562,10 +550,11 @@ namespace HustleHub.BusinessArea.Repository
                 CreatedAt = project.CreatedAt,
                 UpdatedAt = project.UpdatedAt,
                 DisplayStatus = project.DisplayStatus,
-                Image = imageBase64,
+                Image = imageBase64, // ✅ for display
                 Skills = skills
             };
         }
+
 
 
         public async Task<APIResponse> DeleteAdminProjectAsync(int projectId)
