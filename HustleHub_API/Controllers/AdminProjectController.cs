@@ -30,7 +30,7 @@ namespace HustleHub_API.Controllers
             _logger.LogInformation("\n\n AdminProjectController : \n");
         }
 
-        [HttpPost("add-admin-project")]
+        [HttpPost("Add")]
         public async Task<IActionResult> AddAdminProject([FromForm] AdminProjectDTO model)
         {
             var result = await objRep.AddAdminProjectAsync(model);
