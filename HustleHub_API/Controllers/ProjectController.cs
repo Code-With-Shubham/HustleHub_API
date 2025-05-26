@@ -52,7 +52,7 @@ namespace HustleHub_API.Controllers
 
         [Route("PurchesRequest")]
         [HttpPost]
-        public async Task<IActionResult> PurchesRequest([FromForm] PurchaseRequestDto model)
+        public async Task<IActionResult> PurchesRequest([FromBody] PurchaseRequestDto model)
         {
             var result = await objRep.PurchaseRequestAsync(model);
             return StatusCode(result.Code, result);
