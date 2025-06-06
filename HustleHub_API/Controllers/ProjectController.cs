@@ -35,6 +35,8 @@ namespace HustleHub_API.Controllers
             return StatusCode(result.Code, result);
         }
 
+
+
         [HttpGet("All")]
         public async Task<IActionResult> GetAllProjects()
         {
@@ -80,6 +82,11 @@ namespace HustleHub_API.Controllers
             return StatusCode(result.Code, result);
         }
 
-
+        [HttpDelete("DeleteProjectRequest")]
+        public async Task<IActionResult> DeleteProjectRequest([FromQuery] int projectRequestId)
+        {
+            var result = await objRep.DeleteProjectRequestAsync(projectRequestId);
+            return StatusCode(result.Code, result);
+        }
     }
 }

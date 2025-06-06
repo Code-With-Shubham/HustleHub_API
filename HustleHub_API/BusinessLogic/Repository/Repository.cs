@@ -868,5 +868,29 @@ namespace HustleHub.BusinessArea.Repository
                 return null;
             }
         }
+
+        public async Task<APIResponse> DeleteProjectRequestAsync(int projectRequestId)
+        {
+            var projectRequest = await _dbcontext.ProjectRequests.FindAsync(projectRequestId);
+            if (projectRequest == null)
+            {
+                return new APIResponse
+                {
+                    Code = 404,
+                    Status = "error",
+                    Message = "Project request not found."
+                };
+            }
+
+            _dbcontext.ProjectRequests.Remove(projectRequest);
+            await _dbcontext.SaveChangesAsync();
+
+            return new APIResponse
+            {
+                Code = 200,
+                Status = "success",
+                Message = "Project request deleted successfully."
+            };
+        }
     }
 }

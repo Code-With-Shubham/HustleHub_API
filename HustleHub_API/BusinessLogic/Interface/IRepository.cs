@@ -30,6 +30,7 @@ namespace HustleHub.BusinessArea.Interface
         Task<APIResponse> SubmitProjectRequestAsync(RequiredProjectDTO model);
         Task<IEnumerable<ProjectRequest>> GetAllProjectsAsync();
         Task<ProjectRequest?> GetProjectByIdAsync(int id);
+        Task<APIResponse> DeleteProjectRequestAsync(int projectRequestId);
 
         //Admin Project
         Task<APIResponse> AddAdminProjectAsync(AdminProjectDTO model);
