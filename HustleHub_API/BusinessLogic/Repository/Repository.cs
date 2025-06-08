@@ -562,9 +562,9 @@ namespace HustleHub.BusinessArea.Repository
         {
             try
             {
-                // Find the AdminProject by ID
+                // Step 1: Fetch the project including related ProjectSkills
                 var project = await _dbcontext.AdminProjects
-                    .Include(p => p.ProjectSkills) // Include related skills
+                    .Include(p => p.ProjectSkills)
                     .FirstOrDefaultAsync(p => p.ProjectId == projectId);
 
                 if (project == null)
@@ -577,23 +577,33 @@ namespace HustleHub.BusinessArea.Repository
                     };
                 }
 
-                // Delete related skills
+                // Step 2: Delete related ProjectSkills (if any)
                 if (project.ProjectSkills != null && project.ProjectSkills.Any())
                 {
                     _dbcontext.ProjectSkills.RemoveRange(project.ProjectSkills);
                 }
 
-                // No need to delete any file, as image is stored in DB as byte[]
+                // Step 3: Delete related PurchaseRequests (if any)
+                var relatedPurchases = await _dbcontext.PurchaseRequests
+                    .Where(p => p.ProjectId == projectId)
+                    .ToListAsync();
 
-                // Delete the AdminProject
+                if (relatedPurchases.Any())
+                {
+                    _dbcontext.PurchaseRequests.RemoveRange(relatedPurchases);
+                }
+
+                // Step 4: Delete the AdminProject
                 _dbcontext.AdminProjects.Remove(project);
-                await _dbcontext.SaveChangesAsync();
+
+                // Step 5: Save all changes
+                int cnt = await _dbcontext.SaveChangesAsync();
 
                 return new APIResponse
                 {
-                    Code = 200,
-                    Status = "success",
-                    Message = "Admin project deleted successfully."
+                    Code = cnt > 0 ? 200 : 500,
+                    Status = cnt > 0 ? "success" : "error",
+                    Message = cnt > 0 ? "Admin project and all related data deleted successfully." : "Deletion failed."
                 };
             }
             catch (Exception ex)
@@ -602,10 +612,13 @@ namespace HustleHub.BusinessArea.Repository
                 {
                     Code = 500,
                     Status = "error",
-                    Message = $"Error: {ex.Message}"
+                    Message = $"Exception: {ex.Message}" +
+                              (ex.InnerException != null ? $". Inner: {ex.InnerException.Message}" : "")
                 };
             }
         }
+
+
 
 
 
